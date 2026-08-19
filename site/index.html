@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Marks the document as script-capable before first paint, so the
+         scroll-reveal rules below never hide content from a no-JS browser. -->
+    <script>
+      document.documentElement.classList.add('js')
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SAGE — answers, while they're still asking</title>
+    <meta
+      name="description"
+      content="SAGE listens to your interview, works out when a question has been asked, and puts an answer on screen you can say out loud. Hidden from screen sharing."
+    />
+    <meta property="og:title" content="SAGE — Speech Answer Generation Engine" />
+    <meta
+      property="og:description"
+      content="A desktop assistant for live interviews. Answers on screen before they finish asking."
+    />
+    <meta property="og:type" content="website" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%235B4BE8'/%3E%3Cg fill='white'%3E%3Crect x='4.2' y='8.4' width='2.1' height='7.2' rx='1.05'/%3E%3Crect x='7.6' y='5.8' width='2.1' height='12.5' rx='1.05'/%3E%3Crect x='11' y='3.4' width='2.1' height='17.3' rx='1.05'/%3E%3Crect x='14.4' y='5.8' width='2.1' height='12.5' rx='1.05'/%3E%3Crect x='17.8' y='8.4' width='2.1' height='7.2' rx='1.05'/%3E%3C/g%3E%3C/svg%3E"
+    />
+    <style>
+      :root {
+        --bg: #07070c;
+        --bg-soft: #0d0d16;
+        --panel: rgba(255, 255, 255, 0.028);
+        --line: rgba(255, 255, 255, 0.09);
+        --line-soft: rgba(255, 255, 255, 0.055);
+        --text: #edecf5;
+        --muted: #9b99ad;
+        --dim: #6e6c80;
+        --indigo: #818cf8;
+        --violet: #c084fc;
+        --grad: linear-gradient(135deg, #818cf8, #a78bfa 45%, #c084fc);
+        --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        --maxw: 1120px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+
+      /* Ambient light behind the page. Fixed so it does not scroll away. */
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        background:
+          radial-gradient(60rem 40rem at 18% -10%, rgba(99, 102, 241, 0.17), transparent 60%),
+          radial-gradient(50rem 35rem at 88% 8%, rgba(168, 85, 247, 0.13), transparent 60%),
+          radial-gradient(40rem 30rem at 50% 105%, rgba(129, 140, 248, 0.08), transparent 60%);
+      }
+
+      .wrap {
+        position: relative;
+        z-index: 1;
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      /* ---------- nav ---------- */
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        backdrop-filter: blur(14px);
+        background: rgba(7, 7, 12, 0.72);
+        border-bottom: 1px solid var(--line-soft);
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        height: 62px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        font-size: 0.92rem;
+        text-decoration: none;
+      }
+
+      .brand span {
+        background: var(--grad);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 1.75rem;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+
+      .nav-links a {
+        text-decoration: none;
+        transition: color 0.18s;
+      }
+
+      .nav-links a:hover {
+        color: var(--text);
+      }
+
+      @media (max-width: 760px) {
+        .nav-links {
+          display: none;
+        }
+      }
+
+      /* ---------- buttons ---------- */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.8rem 1.35rem;
+        border-radius: 11px;
+        font-weight: 600;
+        font-size: 0.94rem;
+        text-decoration: none;
+        border: 1px solid transparent;
+        transition:
+          transform 0.16s ease,
+          box-shadow 0.22s ease,
+          background 0.2s;
+        white-space: nowrap;
+      }
+
+      .btn-primary {
+        background: var(--grad);
+        color: #14121f;
+        box-shadow: 0 8px 30px -10px rgba(129, 140, 248, 0.75);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 42px -12px rgba(168, 85, 247, 0.75);
+      }
+
+      .btn-ghost {
+        border-color: var(--line);
+        color: var(--text);
+        background: var(--panel);
+      }
+
+      .btn-ghost:hover {
+        border-color: rgba(255, 255, 255, 0.24);
+        transform: translateY(-2px);
+      }
+
+      /* ---------- hero ---------- */
+      .hero {
+        padding: 5.5rem 0 4rem;
+        text-align: center;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.34rem 0.85rem;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--panel);
+        font-size: 0.79rem;
+        color: var(--muted);
+        margin-bottom: 1.6rem;
+      }
+
+      .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #4ade80;
+        box-shadow: 0 0 10px #4ade80;
+      }
+
+      h1 {
+        font-size: clamp(2.5rem, 6.2vw, 4.35rem);
+        line-height: 1.04;
+        letter-spacing: -0.035em;
+        font-weight: 800;
+        margin: 0 0 1.3rem;
+      }
+
+      .h1-accent {
+        background: var(--grad);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .sub {
+        font-size: clamp(1.02rem, 2vw, 1.2rem);
+        color: var(--muted);
+        max-width: 40rem;
+        margin: 0 auto 2.3rem;
+      }
+
+      .cta-row {
+        display: flex;
+        gap: 0.85rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .cta-note {
+        margin-top: 1.1rem;
+        font-size: 0.82rem;
+        color: var(--dim);
+      }
+
+      /* ---------- animated waveform ---------- */
+      .wave {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        height: 92px;
+        margin: 3.2rem auto 0;
+      }
+
+      .wave i {
+        display: block;
+        width: 7px;
+        border-radius: 99px;
+        background: var(--grad);
+        animation: pulse 1.5s ease-in-out infinite;
+        opacity: 0.9;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          height: 16px;
+          opacity: 0.42;
+        }
+        50% {
+          height: 74px;
+          opacity: 1;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .wave i {
+          animation: none;
+          height: 42px;
+        }
+      }
+
+      /* ---------- stats ---------- */
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1px;
+        background: var(--line-soft);
+        border: 1px solid var(--line-soft);
+        border-radius: 16px;
+        overflow: hidden;
+        margin: 4.5rem 0;
+      }
+
+      .stat {
+        background: var(--bg-soft);
+        padding: 1.6rem 1.4rem;
+        text-align: center;
+      }
+
+      .stat b {
+        display: block;
+        font-size: 1.85rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        font-family: var(--mono);
+        background: var(--grad);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .stat span {
+        font-size: 0.83rem;
+        color: var(--dim);
+      }
+
+      /* ---------- sections ---------- */
+      section {
+        padding: 4.5rem 0;
+      }
+
+      .eyebrow {
+        font-size: 0.76rem;
+        letter-spacing: 0.19em;
+        text-transform: uppercase;
+        color: var(--indigo);
+        font-weight: 600;
+        margin-bottom: 0.85rem;
+      }
+
+      h2 {
+        font-size: clamp(1.7rem, 3.6vw, 2.5rem);
+        letter-spacing: -0.028em;
+        line-height: 1.15;
+        margin: 0 0 1rem;
+        font-weight: 700;
+      }
+
+      .lead {
+        color: var(--muted);
+        max-width: 38rem;
+        margin: 0 0 2.6rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(275px, 1fr));
+        gap: 1.1rem;
+      }
+
+      .card {
+        border: 1px solid var(--line-soft);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012));
+        border-radius: 15px;
+        padding: 1.6rem;
+        transition:
+          border-color 0.22s,
+          transform 0.22s;
+      }
+
+      .card:hover {
+        border-color: rgba(129, 140, 248, 0.42);
+        transform: translateY(-3px);
+      }
+
+      .card h3 {
+        font-size: 1.03rem;
+        margin: 0.9rem 0 0.5rem;
+        font-weight: 600;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .ico {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        background: rgba(129, 140, 248, 0.13);
+        border: 1px solid rgba(129, 140, 248, 0.24);
+      }
+
+      /* ---------- pipeline ---------- */
+      .pipe {
+        border: 1px solid var(--line-soft);
+        border-radius: 16px;
+        background: var(--bg-soft);
+        padding: 1.6rem;
+        overflow-x: auto;
+      }
+
+      .pipe pre {
+        margin: 0;
+        font-family: var(--mono);
+        font-size: 0.83rem;
+        line-height: 1.85;
+        color: var(--muted);
+        white-space: pre;
+      }
+
+      .pipe .hl {
+        color: var(--indigo);
+      }
+
+      /* ---------- steps ---------- */
+      .steps {
+        display: grid;
+        gap: 1px;
+        background: var(--line-soft);
+        border: 1px solid var(--line-soft);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+
+      .step {
+        background: var(--bg-soft);
+        padding: 1.5rem 1.6rem;
+        display: flex;
+        gap: 1.15rem;
+        align-items: flex-start;
+      }
+
+      .num {
+        flex: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        font-size: 0.82rem;
+        font-weight: 700;
+        font-family: var(--mono);
+        background: rgba(129, 140, 248, 0.14);
+        border: 1px solid rgba(129, 140, 248, 0.3);
+        color: var(--indigo);
+      }
+
+      .step h4 {
+        margin: 0 0 0.3rem;
+        font-size: 0.98rem;
+        font-weight: 600;
+      }
+
+      .step p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      /* ---------- callout ---------- */
+      .note {
+        border: 1px solid rgba(251, 191, 36, 0.26);
+        background: rgba(251, 191, 36, 0.055);
+        border-radius: 13px;
+        padding: 1.15rem 1.35rem;
+        font-size: 0.9rem;
+        color: #e6dcc4;
+        margin-top: 1.6rem;
+      }
+
+      .note b {
+        color: #fcd34d;
+      }
+
+      /* ---------- final cta ---------- */
+      .final {
+        text-align: center;
+        border: 1px solid var(--line-soft);
+        border-radius: 22px;
+        padding: 4rem 2rem;
+        background:
+          radial-gradient(30rem 18rem at 50% 0%, rgba(129, 140, 248, 0.15), transparent 70%),
+          var(--bg-soft);
+      }
+
+      /* ---------- footer ---------- */
+      footer {
+        border-top: 1px solid var(--line-soft);
+        margin-top: 4.5rem;
+        padding: 2.6rem 0;
+        color: var(--dim);
+        font-size: 0.86rem;
+      }
+
+      .foot {
+        display: flex;
+        justify-content: space-between;
+        gap: 1.4rem;
+        flex-wrap: wrap;
+      }
+
+      footer a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+
+      footer a:hover {
+        color: var(--text);
+      }
+
+      /* ---------- scroll reveal ---------- */
+      .js .reveal {
+        opacity: 0;
+        transform: translateY(18px);
+        transition:
+          opacity 0.6s ease,
+          transform 0.6s ease;
+      }
+
+      .js .reveal.in {
+        opacity: 1;
+        transform: none;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .js .reveal {
+          opacity: 1;
+          transform: none;
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="wrap nav">
+        <a class="brand" href="#top">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+            <defs>
+              <linearGradient id="m" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#818CF8" />
+                <stop offset="100%" stop-color="#C084FC" />
+              </linearGradient>
+            </defs>
+            <g fill="url(#m)">
+              <rect x="4.2" y="8.4" width="2.1" height="7.2" rx="1.05" />
+              <rect x="7.6" y="5.8" width="2.1" height="12.5" rx="1.05" />
+              <rect x="11" y="3.4" width="2.1" height="17.3" rx="1.05" />
+              <rect x="14.4" y="5.8" width="2.1" height="12.5" rx="1.05" />
+              <rect x="17.8" y="8.4" width="2.1" height="7.2" rx="1.05" />
+            </g>
+          </svg>
+          <span>SAGE</span>
+        </a>
+        <nav class="nav-links">
+          <a href="#how">How it works</a>
+          <a href="#features">Features</a>
+          <a href="#setup">Setup</a>
+          <a href="#source">Source</a>
+        </nav>
+        <a
+          class="btn btn-primary"
+          style="padding: 0.55rem 1rem; font-size: 0.86rem"
+          href="https://github.com/MytreshR/SAGE-releases/releases/latest"
+          >Download</a
+        >
+      </div>
+    </header>
+
+    <main id="top">
+      <!-- hero -->
+      <div class="wrap hero">
+        <div class="pill"><span class="dot"></span> Version 1.0 · Windows 10/11</div>
+        <h1>
+          Answers on screen<br />
+          <span class="h1-accent">while they're still asking.</span>
+        </h1>
+        <p class="sub">
+          SAGE listens to your interview, works out when a question has actually been asked, and
+          hands you an answer you can say out loud — grounded in your own resume, and invisible to
+          screen sharing.
+        </p>
+        <div class="cta-row">
+          <a
+            class="btn btn-primary"
+            href="https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.0.0-setup.exe"
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download for Windows
+          </a>
+          <a class="btn btn-ghost" href="#how">See how it works</a>
+        </div>
+        <p class="cta-note">Free · 95 MB · Bring your own OpenAI key</p>
+
+        <div class="wave" aria-hidden="true">
+          <i style="animation-delay: 0s"></i>
+          <i style="animation-delay: 0.12s"></i>
+          <i style="animation-delay: 0.24s"></i>
+          <i style="animation-delay: 0.36s"></i>
+          <i style="animation-delay: 0.48s"></i>
+          <i style="animation-delay: 0.36s"></i>
+          <i style="animation-delay: 0.24s"></i>
+          <i style="animation-delay: 0.12s"></i>
+          <i style="animation-delay: 0s"></i>
+        </div>
+      </div>
+
+      <!-- measured numbers -->
+      <div class="wrap">
+        <div class="stats reveal">
+          <div class="stat"><b>0.73s</b><span>median to first word</span></div>
+          <div class="stat"><b>450ms</b><span>turn detection</span></div>
+          <div class="stat"><b>24kHz</b><span>streaming audio</span></div>
+          <div class="stat"><b>0</b><span>data stored by SAGE</span></div>
+        </div>
+      </div>
+
+      <!-- how it works -->
+      <section id="how" class="wrap">
+        <div class="reveal">
+          <p class="eyebrow">How it works</p>
+          <h2>Built around one hard problem</h2>
+          <p class="lead">
+            Anyone can send audio to a model. The difficulty is knowing <em>when a question ended</em>.
+            End the turn too early and one question arrives in pieces, each answered separately. End
+            it too late and you are still waiting while the room goes quiet.
+          </p>
+        </div>
+
+        <div class="pipe reveal">
+          <pre>
+  microphone / system audio
+          │
+          ▼
+  <span class="hl">streaming transcription</span>      audio is sent as it is captured, so the
+          │                     transcript lands while you are still listening
+          ▼
+  <span class="hl">transcript hygiene</span>           drops the stock phrases these models emit
+          │                     during silence, and stitches a question that
+          ▼                     was split by a mid-sentence pause
+  <span class="hl">question detection</span>           small talk, filler and your own speech
+          │                     do not trigger an answer
+          ▼
+  <span class="hl">grounded answer</span>              streamed word by word from your resume
+          │
+          ▼
+      on screen</pre
+          >
+        </div>
+      </section>
+
+      <!-- features -->
+      <section id="features" class="wrap">
+        <div class="reveal">
+          <p class="eyebrow">Features</p>
+          <h2>Details that decide whether it helps</h2>
+          <p class="lead">
+            Every one of these exists because the obvious version failed in a real conversation.
+          </p>
+        </div>
+
+        <div class="grid reveal">
+          <div class="card">
+            <div class="ico">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+            </div>
+            <h3>One question, one answer</h3>
+            <p>
+              A pause mid-sentence used to split a question into fragments, each answered on its own.
+              SAGE stitches them back together, so it answers what you were actually asked.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="ico">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <h3>It won't invent your CV</h3>
+            <p>
+              Answers are grounded in the resume you provide. Asked about something you have never
+              touched, it says so and pivots to how you would approach it — rather than inventing a
+              project that unravels under follow-up.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="ico">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </div>
+            <h3>Invisible to screen sharing</h3>
+            <p>
+              The window is excluded from capture, so it does not appear in Zoom, Teams or Google
+              Meet — and it stays out of the taskbar and Alt-Tab.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="ico">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <h3>Hears your vocabulary</h3>
+            <p>
+              Your employers and technologies are fed to the recogniser, so <em>Kubernetes</em>,
+              <em>idempotency</em> and your own company name come back spelled correctly instead of
+              as near-homophones.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="ico">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </div>
+            <h3>Screenshot solving</h3>
+            <p>
+              Capture a coding or system-design question on screen and get a worked solution with
+              code and complexity — using a heavier model, because that answer is read, not spoken.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="ico">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </div>
+            <h3>Not just interviews</h3>
+            <p>
+              General mode drops the candidate framing and helps in any live conversation — a
+              meeting, a client call, a class.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- setup -->
+      <section id="setup" class="wrap">
+        <div class="reveal">
+          <p class="eyebrow">Setup</p>
+          <h2>Four steps, about five minutes</h2>
+        </div>
+
+        <div class="steps reveal">
+          <div class="step">
+            <div class="num">1</div>
+            <div>
+              <h4>Install</h4>
+              <p>
+                Run the setup file. Windows will warn about an unknown publisher because the
+                installer is not code-signed yet — choose <b>More info → Run anyway</b>.
+              </p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="num">2</div>
+            <div>
+              <h4>Add your OpenAI key</h4>
+              <p>
+                SAGE opens Settings on first launch and asks for one. Create a key at
+                <a style="color: var(--indigo)" href="https://platform.openai.com/api-keys"
+                  >platform.openai.com</a
+                >.
+              </p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="num">3</div>
+            <div>
+              <h4>Paste in your resume</h4>
+              <p>
+                This matters more than it looks. It grounds every answer <em>and</em> teaches the
+                recogniser your employers and technologies.
+              </p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="num">4</div>
+            <div>
+              <h4>Start a session</h4>
+              <p>Allow microphone access, press Start, and talk. Answers appear as questions land.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="note reveal">
+          <b>SAGE runs on your own OpenAI account.</b> There is no subscription and nothing is
+          billed by SAGE — but transcription and answers are charged to your OpenAI account at
+          OpenAI's rates. Your key stays on your machine and is used only to call OpenAI directly.
+        </div>
+      </section>
+
+      <!-- source -->
+      <section id="source" class="wrap">
+        <div class="final reveal">
+          <h2 style="margin-bottom: 0.9rem">Ready when they are</h2>
+          <p class="sub" style="margin-bottom: 2rem">
+            Free to download. Bring your own key. No account, no subscription, nothing stored.
+          </p>
+          <div class="cta-row">
+            <a
+              class="btn btn-primary"
+              href="https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.0.0-setup.exe"
+              >Download for Windows</a
+            >
+            <a class="btn btn-ghost" href="mailto:mytresh1984@outlook.com?subject=SAGE%20source%20licensing"
+              >Licence the source</a
+            >
+          </div>
+          <p class="cta-note">
+            SAGE is proprietary software distributed as a compiled application. The source is
+            available for licensing — enquiries welcome.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap foot">
+        <div>© 2026 Mytresh Ravi. All rights reserved.</div>
+        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap">
+          <a href="https://github.com/MytreshR/SAGE-releases/releases">Releases</a>
+          <a href="mailto:mytresh1984@outlook.com">Contact</a>
+          <a href="https://github.com/MytreshR/SAGE-releases#licence">Licence</a>
+        </div>
+      </div>
+      <div class="wrap" style="margin-top: 1.4rem; max-width: 46rem; color: #575567; font-size: 0.8rem">
+        SAGE is a tool for preparation and live assistance. Some interview processes and proctored
+        assessments prohibit outside assistance — please use it in line with the rules of any process
+        you take part in.
+      </div>
+    </footer>
+
+    <script>
+      // Reveal sections as they scroll into view. The hiding rules are scoped to
+      // .js on <html>, added before first paint, so a script failure or a
+      // no-JS browser shows the full page rather than a blank one.
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              e.target.classList.add('in');
+              io.unobserve(e.target);
+            }
+          }
+        },
+        { threshold: 0.12 }
+      );
+      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+    </script>
+  </body>
+</html>
