@@ -559,9 +559,10 @@
       /* ---------- licence tiers ---------- */
       .tiers {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
-        gap: 1.1rem;
+        grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+        gap: 1.3rem;
         margin-bottom: 3rem;
+        max-width: 840px;
       }
 
       .tier {
@@ -1007,45 +1008,33 @@
 
         <div class="tiers reveal">
           <div class="tier">
-            <div class="tier-tag">Single developer</div>
-            <h3 class="tier-name">Study &amp; modify</h3>
+            <div class="tier-tag">One-time</div>
+            <h3 class="tier-name">Current release</h3>
             <div class="tier-price">$499</div>
-            <p class="price-sub" style="margin: 0">one-off, one developer</p>
+            <p class="price-sub" style="margin: 0">this version, as it stands today</p>
             <ul>
-              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Full source repository</span></li>
-              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Modify for your own private use</span></li>
-              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Email support for 30 days</span></li>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Full source for the version shipping now</span></li>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Modify it for your own use</span></li>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>30 days of email support</span></li>
+              <li style="color: var(--dim)">&mdash; Future versions not included</li>
               <li style="color: var(--dim)">&mdash; No redistribution or resale</li>
             </ul>
-            <a class="btn btn-ghost" style="justify-content: center" href="mailto:mytresh1984@outlook.com?subject=SAGE%20source%20-%20Single%20developer">Enquire</a>
+            <a class="btn btn-ghost" style="justify-content: center" href="mailto:mytresh1984@outlook.com?subject=SAGE%20source%20-%20Current%20release">Enquire</a>
           </div>
 
           <div class="tier featured">
-            <div class="tier-tag">Most common</div>
-            <h3 class="tier-name">Commercial</h3>
-            <div class="tier-price">$1,499</div>
-            <p class="price-sub" style="margin: 0">one-off, one company</p>
+            <div class="tier-tag">Recommended</div>
+            <h3 class="tier-name">Full source &amp; updates</h3>
+            <div class="tier-price">$1,999</div>
+            <p class="price-sub" style="margin: 0">one-off, includes every future version</p>
             <ul>
-              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Everything in Study &amp; modify</span></li>
-              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Use inside your own product or company</span></li>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Everything in Current release</span></li>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Every future version as it ships</span></li>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Use it inside your own product or company</span></li>
               <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Unlimited developers on your team</span></li>
-              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>90 days of support, walkthrough call included</span></li>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Priority support and a walkthrough call</span></li>
             </ul>
-            <a class="btn btn-primary" style="justify-content: center" href="mailto:mytresh1984@outlook.com?subject=SAGE%20source%20-%20Commercial">Enquire</a>
-          </div>
-
-          <div class="tier">
-            <div class="tier-tag">White label</div>
-            <h3 class="tier-name">Full rights</h3>
-            <div class="tier-price">$4,999</div>
-            <p class="price-sub" style="margin: 0">one-off, transferable</p>
-            <ul>
-              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Everything in Commercial</span></li>
-              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Rebrand and sell as your own product</span></li>
-              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Redistribution rights</span></li>
-              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Handover session and priority support</span></li>
-            </ul>
-            <a class="btn btn-ghost" style="justify-content: center" href="mailto:mytresh1984@outlook.com?subject=SAGE%20source%20-%20Full%20rights">Enquire</a>
+            <a class="btn btn-primary" style="justify-content: center" href="mailto:mytresh1984@outlook.com?subject=SAGE%20source%20-%20Full%20source%20and%20updates">Get in touch</a>
           </div>
         </div>
 
