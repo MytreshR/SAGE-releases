@@ -1,0 +1,6 @@
+SAGE-releases hosts published builds only.
+The application source lives in a separate private repository.
+*.exe
+*.dmg
+*.AppImage
+*.deb
