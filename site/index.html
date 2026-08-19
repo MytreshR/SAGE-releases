@@ -459,6 +459,88 @@
         font-size: 0.9rem;
       }
 
+      /* ---------- done-for-you setup ---------- */
+      .service {
+        margin-top: 2.6rem;
+        border: 1px solid rgba(129, 140, 248, 0.3);
+        border-radius: 18px;
+        padding: 2.2rem;
+        background:
+          radial-gradient(28rem 16rem at 12% 0%, rgba(129, 140, 248, 0.13), transparent 70%),
+          var(--bg-soft);
+        display: grid;
+        grid-template-columns: 1.25fr 1fr;
+        gap: 2.2rem;
+        align-items: center;
+      }
+
+      @media (max-width: 780px) {
+        .service {
+          grid-template-columns: 1fr;
+          gap: 1.6rem;
+          padding: 1.7rem;
+        }
+      }
+
+      .service h3 {
+        margin: 0.6rem 0 0.7rem;
+        font-size: 1.45rem;
+        letter-spacing: -0.02em;
+      }
+
+      .service p {
+        color: var(--muted);
+        margin: 0 0 1.2rem;
+        font-size: 0.95rem;
+      }
+
+      .service ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 0.6rem;
+      }
+
+      .service li {
+        display: flex;
+        gap: 0.65rem;
+        align-items: flex-start;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+
+      .tick {
+        flex: none;
+        margin-top: 3px;
+        color: #4ade80;
+      }
+
+      .price-box {
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.022);
+        text-align: center;
+      }
+
+      .price {
+        font-family: var(--mono);
+        font-size: 1.9rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        background: var(--grad);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .price-sub {
+        font-size: 0.8rem;
+        color: var(--dim);
+        margin: 0.25rem 0 1.2rem;
+      }
+
       /* ---------- callout ---------- */
       .note {
         border: 1px solid rgba(251, 191, 36, 0.26);
@@ -472,6 +554,78 @@
 
       .note b {
         color: #fcd34d;
+      }
+
+      /* ---------- licence tiers ---------- */
+      .tiers {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+        gap: 1.1rem;
+        margin-bottom: 3rem;
+      }
+
+      .tier {
+        border: 1px solid var(--line-soft);
+        border-radius: 16px;
+        padding: 1.8rem 1.6rem;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01));
+        display: flex;
+        flex-direction: column;
+        transition:
+          border-color 0.22s,
+          transform 0.22s;
+      }
+
+      .tier:hover {
+        transform: translateY(-3px);
+        border-color: rgba(129, 140, 248, 0.4);
+      }
+
+      .tier.featured {
+        border-color: rgba(129, 140, 248, 0.45);
+        background:
+          radial-gradient(22rem 12rem at 50% 0%, rgba(129, 140, 248, 0.14), transparent 70%),
+          var(--bg-soft);
+      }
+
+      .tier-tag {
+        font-size: 0.7rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: var(--indigo);
+        margin-bottom: 0.7rem;
+      }
+
+      .tier-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0 0 0.35rem;
+      }
+
+      .tier-price {
+        font-family: var(--mono);
+        font-size: 2.05rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        margin: 0.5rem 0 0.15rem;
+      }
+
+      .tier ul {
+        list-style: none;
+        padding: 0;
+        margin: 1.3rem 0 1.7rem;
+        display: grid;
+        gap: 0.55rem;
+        flex: 1;
+      }
+
+      .tier li {
+        display: flex;
+        gap: 0.6rem;
+        align-items: flex-start;
+        font-size: 0.87rem;
+        color: var(--muted);
       }
 
       /* ---------- final cta ---------- */
@@ -559,7 +713,8 @@
           <a href="#how">How it works</a>
           <a href="#features">Features</a>
           <a href="#setup">Setup</a>
-          <a href="#source">Source</a>
+          <a href="#concierge">Setup help</a>
+          <a href="#source">Pricing</a>
         </nav>
         <a
           class="btn btn-primary"
@@ -787,10 +942,113 @@
           billed by SAGE — but transcription and answers are charged to your OpenAI account at
           OpenAI's rates. Your key stays on your machine and is used only to call OpenAI directly.
         </div>
+
+        <!-- Done-for-you setup: placed here deliberately, right where someone
+             who is not technical realises step 2 is a wall. -->
+        <div class="service reveal" id="concierge">
+          <div>
+            <p class="eyebrow" style="margin-bottom: 0">Optional</p>
+            <h3>Not comfortable with API keys?</h3>
+            <p>
+              If steps 2 and 3 sound like someone else's job, we will do them with you on a short
+              screen share and leave you with a working setup.
+            </p>
+            <ul>
+              <li>
+                <svg class="tick" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+                <span>Create your OpenAI account and generate a key</span>
+              </li>
+              <li>
+                <svg class="tick" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+                <span>Set a spending limit so there are no surprise bills</span>
+              </li>
+              <li>
+                <svg class="tick" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+                <span>Install SAGE, add your resume and tune the settings</span>
+              </li>
+              <li>
+                <svg class="tick" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+                <span>Run a practice session together so you know it works</span>
+              </li>
+            </ul>
+            <p style="margin: 1.2rem 0 0; font-size: 0.84rem; color: var(--dim)">
+              The account and key are created in your name and stay yours — we never ask for your
+              password or card details, and OpenAI usage is still billed to you.
+            </p>
+          </div>
+
+          <div class="price-box">
+            <div class="price">$49</div>
+            <p class="price-sub">One-off, per person</p>
+            <a
+              class="btn btn-primary"
+              style="width: 100%; justify-content: center"
+              href="mailto:mytresh1984@outlook.com?subject=SAGE%20setup%20help&body=Hi%20Mytresh%2C%0A%0AI%27d%20like%20help%20setting%20SAGE%20up.%0A%0AMy%20timezone%3A%20%0ABest%20times%20to%20call%3A%20%0A"
+              >Ask about setup help</a
+            >
+            <p style="margin: 0.9rem 0 0; font-size: 0.78rem; color: var(--dim)">
+              Usually 20–30 minutes
+            </p>
+          </div>
+        </div>
       </section>
 
       <!-- source -->
       <section id="source" class="wrap">
+        <div class="reveal">
+          <p class="eyebrow">Source licensing</p>
+          <h2>Want the code, not just the app?</h2>
+          <p class="lead">
+            SAGE ships as a compiled application and the source is not open. If you want to build on
+            it, study it, or ship something of your own from it, licence it properly rather than
+            pulling it apart &mdash; you get the real repository, documented, and a person to ask.
+          </p>
+        </div>
+
+        <div class="tiers reveal">
+          <div class="tier">
+            <div class="tier-tag">Single developer</div>
+            <h3 class="tier-name">Study &amp; modify</h3>
+            <div class="tier-price">$499</div>
+            <p class="price-sub" style="margin: 0">one-off, one developer</p>
+            <ul>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Full source repository</span></li>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Modify for your own private use</span></li>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Email support for 30 days</span></li>
+              <li style="color: var(--dim)">&mdash; No redistribution or resale</li>
+            </ul>
+            <a class="btn btn-ghost" style="justify-content: center" href="mailto:mytresh1984@outlook.com?subject=SAGE%20source%20-%20Single%20developer">Enquire</a>
+          </div>
+
+          <div class="tier featured">
+            <div class="tier-tag">Most common</div>
+            <h3 class="tier-name">Commercial</h3>
+            <div class="tier-price">$1,499</div>
+            <p class="price-sub" style="margin: 0">one-off, one company</p>
+            <ul>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Everything in Study &amp; modify</span></li>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Use inside your own product or company</span></li>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Unlimited developers on your team</span></li>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>90 days of support, walkthrough call included</span></li>
+            </ul>
+            <a class="btn btn-primary" style="justify-content: center" href="mailto:mytresh1984@outlook.com?subject=SAGE%20source%20-%20Commercial">Enquire</a>
+          </div>
+
+          <div class="tier">
+            <div class="tier-tag">White label</div>
+            <h3 class="tier-name">Full rights</h3>
+            <div class="tier-price">$4,999</div>
+            <p class="price-sub" style="margin: 0">one-off, transferable</p>
+            <ul>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Everything in Commercial</span></li>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Rebrand and sell as your own product</span></li>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Redistribution rights</span></li>
+              <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Handover session and priority support</span></li>
+            </ul>
+            <a class="btn btn-ghost" style="justify-content: center" href="mailto:mytresh1984@outlook.com?subject=SAGE%20source%20-%20Full%20rights">Enquire</a>
+          </div>
+        </div>
+
         <div class="final reveal">
           <h2 style="margin-bottom: 0.9rem">Ready when they are</h2>
           <p class="sub" style="margin-bottom: 2rem">
