@@ -19,6 +19,12 @@
       content="A desktop assistant for live interviews. Answers on screen before they finish asking."
     />
     <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://project-sage.vercel.app/og.png" />
+    <meta property="og:url" content="https://project-sage.vercel.app/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://project-sage.vercel.app/og.png" />
+    <meta name="theme-color" content="#07070c" />
+    <link rel="canonical" href="https://project-sage.vercel.app/" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -89,6 +95,80 @@
         color: inherit;
       }
 
+      /* Keyboard users need to see where they are. Scoped to :focus-visible so
+         a mouse click does not leave a ring behind. */
+      a:focus-visible,
+      button:focus-visible {
+        outline: 2px solid var(--indigo);
+        outline-offset: 3px;
+        border-radius: 8px;
+      }
+
+      .skip {
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        z-index: 100;
+        padding: 0.7rem 1.1rem;
+        background: var(--indigo);
+        color: #0b0a14;
+        font-weight: 600;
+        border-radius: 0 0 10px 0;
+      }
+
+      .skip:focus {
+        left: 0;
+      }
+
+      /* ---------- faq ---------- */
+      .faq {
+        display: grid;
+        gap: 1px;
+        background: var(--line-soft);
+        border: 1px solid var(--line-soft);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+
+      .faq details {
+        background: var(--bg-soft);
+      }
+
+      .faq summary {
+        cursor: pointer;
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+        font-size: 0.97rem;
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .faq summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .faq summary::after {
+        content: '+';
+        font-family: var(--mono);
+        color: var(--indigo);
+        font-size: 1.2rem;
+        flex: none;
+      }
+
+      .faq details[open] summary::after {
+        content: '\2212';
+      }
+
+      .faq p {
+        margin: 0;
+        padding: 0 1.5rem 1.35rem;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
       /* ---------- nav ---------- */
       header {
         position: sticky;
@@ -140,9 +220,32 @@
         color: var(--text);
       }
 
+      /* Under 760px the links used to be hidden with nothing in their place,
+         which left phone users no way to navigate. Now they scroll. */
       @media (max-width: 760px) {
+        .nav {
+          height: auto;
+          padding: 0.6rem 0;
+          flex-wrap: wrap;
+        }
+
         .nav-links {
+          order: 3;
+          width: 100%;
+          gap: 1.15rem;
+          font-size: 0.84rem;
+          overflow-x: auto;
+          padding-bottom: 0.2rem;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
+
+        .nav-links::-webkit-scrollbar {
           display: none;
+        }
+
+        .nav-links a {
+          white-space: nowrap;
         }
       }
 
@@ -690,6 +793,8 @@
   </head>
 
   <body>
+    <a class="skip" href="#top">Skip to content</a>
+
     <header>
       <div class="wrap nav">
         <a class="brand" href="#top">
@@ -715,6 +820,7 @@
           <a href="#features">Features</a>
           <a href="#setup">Setup</a>
           <a href="#concierge">Setup help</a>
+          <a href="#faq">FAQ</a>
           <a href="#source">Pricing</a>
         </nav>
         <a
@@ -991,6 +1097,75 @@
               Usually 20–30 minutes
             </p>
           </div>
+        </div>
+      </section>
+
+      <!-- faq -->
+      <section id="faq" class="wrap">
+        <div class="reveal">
+          <p class="eyebrow">Questions</p>
+          <h2>Before you download</h2>
+        </div>
+
+        <div class="faq reveal">
+          <details>
+            <summary>Is there a Mac or Linux version?</summary>
+            <p>
+              Not yet &mdash; version 1.0 is Windows 10/11 only. The app is built on Electron, so
+              macOS and Linux builds are possible; they are not released because they have not been
+              tested properly, and shipping an untested build of something you rely on mid-interview
+              is worse than shipping nothing.
+            </p>
+          </details>
+
+          <details>
+            <summary>What does it cost to run?</summary>
+            <p>
+              SAGE itself is free. Transcription and answers are billed by OpenAI to your own
+              account, charged per minute of audio and per answer. A typical hour-long interview is
+              a small fraction of a dollar, but you set your own spending limit and stay in control.
+            </p>
+          </details>
+
+          <details>
+            <summary>Can the interviewer see it?</summary>
+            <p>
+              The window is excluded from screen capture, so it does not appear when you share your
+              screen in Zoom, Teams or Google Meet, and it stays out of the taskbar and Alt-Tab.
+              It cannot hide a second monitor, your eyes, or a proctoring tool that photographs your
+              room &mdash; and some processes prohibit outside assistance entirely. Use it in line
+              with the rules of whatever you are taking part in.
+            </p>
+          </details>
+
+          <details>
+            <summary>Where does my data go?</summary>
+            <p>
+              Audio is streamed to OpenAI for transcription and never stored by SAGE. Your API key
+              is encrypted at rest on your own machine, and session logs stay in a local folder. No
+              account, no server, no analytics &mdash; there is nowhere for it to be sent, because
+              there is no backend.
+            </p>
+          </details>
+
+          <details>
+            <summary>Why does Windows warn me when I install it?</summary>
+            <p>
+              The installer is not code-signed yet, so Windows SmartScreen flags the publisher as
+              unknown. Choose <b>More info &rarr; Run anyway</b>. A signing certificate is on the
+              list; until then the warning is expected rather than a sign of anything wrong.
+            </p>
+          </details>
+
+          <details>
+            <summary>Does it answer everything it hears?</summary>
+            <p>
+              No. It filters small talk, filler, background noise and the stock phrases speech
+              models invent during silence, and it only answers what looks like a genuine question.
+              If a transcript is too garbled to be sure, it asks the interviewer to repeat rather
+              than answering something that was never asked.
+            </p>
+          </details>
         </div>
       </section>
 
