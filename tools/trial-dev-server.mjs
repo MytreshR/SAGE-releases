@@ -14,13 +14,15 @@ import chat from '../site/api/trial/chat.js'
 import claim from '../site/api/trial/claim.js'
 import heartbeat from '../site/api/trial/heartbeat.js'
 import realtimeToken from '../site/api/trial/realtime-token.js'
+import activate from '../site/api/activate.js'
 import { isPersistent } from '../site/api/_lib/store.js'
 
 const routes = {
   '/api/trial/claim': claim,
   '/api/trial/heartbeat': heartbeat,
   '/api/trial/realtime-token': realtimeToken,
-  '/api/trial/chat': chat
+  '/api/trial/chat': chat,
+  '/api/activate': activate
 }
 
 const port = Number(process.env.PORT || 8787)
