@@ -1,0 +1,8 @@
+{
+  "name": "sage-releases",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:api": "node tools/trial-dev-server.mjs"
+  }
+}
