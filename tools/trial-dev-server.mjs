@@ -10,11 +10,11 @@
  */
 import { createServer } from 'node:http'
 
-import chat from '../api/trial/chat.js'
-import claim from '../api/trial/claim.js'
-import heartbeat from '../api/trial/heartbeat.js'
-import realtimeToken from '../api/trial/realtime-token.js'
-import { isPersistent } from '../api/_lib/store.js'
+import chat from '../site/api/trial/chat.js'
+import claim from '../site/api/trial/claim.js'
+import heartbeat from '../site/api/trial/heartbeat.js'
+import realtimeToken from '../site/api/trial/realtime-token.js'
+import { isPersistent } from '../site/api/_lib/store.js'
 
 const routes = {
   '/api/trial/claim': claim,
