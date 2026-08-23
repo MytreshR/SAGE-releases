@@ -35,9 +35,15 @@ export default async function handler(req, res) {
   const { key, deviceId } = await readJson(req)
 
   if (!isValidDeviceId(deviceId)) return json(res, 400, { error: 'bad-device-id' })
-  if (!process.env.SAGE_KEY_SECRET || !process.env.SAGE_ACTIVATION_PRIVATE_KEY) {
-    console.error('activation is not configured - missing key secret or signing key')
-    return json(res, 500, { error: 'server-misconfigured' })
+  // Names the missing variable rather than saying "misconfigured" and leaving
+  // whoever set it up to guess between two. Names are not secrets; a wrong
+  // guess here costs a redeploy each time.
+  const missing = ['SAGE_KEY_SECRET', 'SAGE_ACTIVATION_PRIVATE_KEY'].filter(
+    (name) => !process.env[name]
+  )
+  if (missing.length) {
+    console.error('activation is not configured - missing', missing.join(', '))
+    return json(res, 500, { error: 'server-misconfigured', missing })
   }
 
   const serial = readKey(process.env.SAGE_KEY_SECRET, key)
