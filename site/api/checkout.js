@@ -67,6 +67,10 @@ export default async function handler(req, res) {
     return json(res, 200, { url: session.url })
   } catch (error) {
     console.error('checkout session failed', error.message)
-    return json(res, 502, { error: 'checkout-failed' })
+    // Stripe's own message is returned, not just swallowed. It describes our
+    // request - "Received unknown parameter: x" - never the customer, and
+    // without it a failure here is only diagnosable from the Vercel logs,
+    // which is a slow way to find a one-word mistake in a parameter name.
+    return json(res, 502, { error: 'checkout-failed', detail: error.message })
   }
 }
