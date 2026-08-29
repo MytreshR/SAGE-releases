@@ -496,26 +496,7 @@
       }
 
       /* ---------- pipeline ---------- */
-      .pipe {
-        border: 1px solid var(--line-soft);
-        border-radius: 16px;
-        background: var(--bg-soft);
-        padding: 1.6rem;
-        overflow-x: auto;
-      }
 
-      .pipe pre {
-        margin: 0;
-        font-family: var(--mono);
-        font-size: 0.83rem;
-        line-height: 1.85;
-        color: var(--muted);
-        white-space: pre;
-      }
-
-      .pipe .hl {
-        color: var(--indigo);
-      }
 
       /* ---------- steps ---------- */
       .steps {
@@ -1139,6 +1120,98 @@
         }
       }
 
+
+      /* ---------- what you can set ---------- */
+
+      .opts {
+        display: grid;
+        grid-template-columns: 1.15fr 1fr;
+        gap: 1.3rem;
+        margin-top: 2.4rem;
+        align-items: start;
+      }
+
+      @media (max-width: 860px) {
+        .opts { grid-template-columns: 1fr; }
+      }
+
+      .opt {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 1.7rem;
+        overflow: hidden;
+      }
+
+      .opt h3 {
+        font-size: 1.08rem;
+        margin: 0 0 0.5rem;
+        letter-spacing: -0.01em;
+      }
+
+      .opt p {
+        color: var(--dim);
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin: 0 0 1.2rem;
+      }
+
+      .opt .shot {
+        width: 100%;
+        margin-bottom: -1.7rem;
+        border-radius: 10px 10px 0 0;
+      }
+
+      /* The roles, spelled out. A screenshot of a dropdown shows eight of them;
+         someone scanning for their own job title needs to see it in the list,
+         not trust that it is further down. */
+      .roles {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        margin-bottom: 0.4rem;
+      }
+
+      .role {
+        font-size: 0.82rem;
+        padding: 0.36rem 0.7rem;
+        border-radius: 7px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.035);
+        color: var(--muted);
+      }
+
+      /* A pair of choices, shown as the two cards the app itself shows. */
+      .pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.7rem;
+      }
+
+      .pick {
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        padding: 0.85rem 0.95rem;
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .pick.on {
+        border-color: rgba(124, 108, 255, 0.55);
+        background: rgba(124, 108, 255, 0.09);
+      }
+
+      .pick b {
+        display: block;
+        font-size: 0.92rem;
+        margin-bottom: 0.2rem;
+      }
+
+      .pick span {
+        font-size: 0.8rem;
+        color: var(--dim);
+        line-height: 1.5;
+      }
+
       /* ---------- footer ---------- */
       footer {
         border-top: 1px solid var(--line-soft);
@@ -1531,34 +1604,84 @@
 
       <section id="how" class="wrap">
         <div class="reveal">
-          <p class="eyebrow">How it works</p>
-          <h2>Built around one hard problem</h2>
+          <p class="eyebrow">Set it up</p>
+          <h2>Tuned to the room you are walking into</h2>
           <p class="lead">
-            Anyone can send audio to a model. The difficulty is knowing <em>when a question ended</em>.
-            End the turn too early and one question arrives in pieces, each answered separately. End
-            it too late and you are still waiting while the room goes quiet.
+            A backend loop wants complexity said out loud. An HR round wants a story. A design round
+            wants neither. SAGE is told which one this is, and answers accordingly — switchable
+            mid-session when the round changes.
           </p>
         </div>
 
-        <div class="pipe reveal">
-          <pre>
-  microphone / system audio
-          │
-          ▼
-  <span class="hl">streaming transcription</span>      audio is sent as it is captured, so the
-          │                     transcript lands while you are still listening
-          ▼
-  <span class="hl">transcript hygiene</span>           drops the stock phrases these models emit
-          │                     during silence, and stitches a question that
-          ▼                     was split by a mid-sentence pause
-  <span class="hl">question detection</span>           small talk, filler and your own speech
-          │                     do not trigger an answer
-          ▼
-  <span class="hl">grounded answer</span>              streamed word by word from your resume
-          │
-          ▼
-      on screen</pre
-          >
+        <div class="opts reveal">
+          <div class="opt">
+            <h3>Thirteen roles to pick from</h3>
+            <p>
+              Each one changes what a strong answer looks like: the vocabulary, the level of detail,
+              and what gets said first.
+            </p>
+            <div class="roles">
+              <span class="role">Software Engineering</span>
+              <span class="role">Frontend</span>
+              <span class="role">Backend</span>
+              <span class="role">Data Science / ML</span>
+              <span class="role">Data / Business Analyst</span>
+              <span class="role">DevOps / SRE / Cloud</span>
+              <span class="role">QA / Test Automation</span>
+              <span class="role">Cybersecurity</span>
+              <span class="role">Product Management</span>
+              <span class="role">Product Design / UX</span>
+              <span class="role">Sales / Customer Success</span>
+              <span class="role">Behavioural / HR</span>
+              <span class="role">General</span>
+            </div>
+            <img
+              class="shot"
+              src="/img/sage-roles.png"
+              width="1920"
+              height="1320"
+              alt="The Interviewing For list open in SAGE, showing the roles you can choose."
+            />
+          </div>
+
+          <div>
+            <div class="opt" style="margin-bottom: 1.3rem">
+              <h3>Answer on its own, or when you say</h3>
+              <p>
+                Automatic fires when the speaker goes quiet — hands-free, and nothing to press on
+                camera. Manual waits for Ctrl+Shift+A, which keeps a question asked in three pieces
+                as one question.
+              </p>
+              <div class="pair">
+                <div class="pick on">
+                  <b>Automatic</b>
+                  <span>Silence ends the question</span>
+                </div>
+                <div class="pick">
+                  <b>Manual</b>
+                  <span>You press Answer</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="opt">
+              <h3>Two models, and you choose</h3>
+              <p>
+                Measured on one machine, median of five runs. Luna is both the faster and the
+                stronger of the two here, which is why it is the default.
+              </p>
+              <div class="pair">
+                <div class="pick on">
+                  <b>GPT-5.6 Luna</b>
+                  <span>~0.73s to the first word</span>
+                </div>
+                <div class="pick">
+                  <b>GPT-5.6 Sol</b>
+                  <span>Slower, more deliberate</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
