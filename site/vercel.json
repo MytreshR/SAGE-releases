@@ -24,5 +24,17 @@
       "source": "/v1/chat/completions",
       "destination": "/api/trial/chat"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/download",
+      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.1.1-setup.exe",
+      "permanent": false
+    },
+    {
+      "source": "/releases",
+      "destination": "https://github.com/MytreshR/SAGE-releases/releases",
+      "permanent": false
+    }
   ]
 }
