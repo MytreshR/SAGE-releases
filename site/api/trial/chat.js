@@ -64,6 +64,63 @@ export default async function handler(req, res) {
 
   if (!upstream.body) return res.end()
 
-  for await (const chunk of upstream.body) res.write(Buffer.from(chunk))
+  // Sniff the usage totals on the way past, without buffering the stream.
+  //
+  // The client asks for stream_options.include_usage, so OpenAI sends one last
+  // SSE event carrying the token counts - and until now it was piped straight
+  // through and forgotten. That was fine when the customer's own key paid.
+  // It is not fine now: this is the only place the vendor can see what an
+  // answer actually cost, and "what does a licensed hour cost me" has no other
+  // answer short of reading the dashboard and guessing at attribution.
+  //
+  // Only a rolling tail is kept, so a long answer costs nothing extra to watch
+  // and the response is never delayed.
+  let tail = ''
+  for await (const chunk of upstream.body) {
+    const buf = Buffer.from(chunk)
+    res.write(buf)
+    tail = (tail + buf.toString('utf8')).slice(-4000)
+  }
   res.end()
+
+  logUsage(gate, body.model, tail)
+}
+
+/**
+ * One line per answer, in the Vercel logs, tagged by ledger so trial spend and
+ * licence spend can be totted up separately. Wrapped in its own try: a logging
+ * mistake must never take down an endpoint that has already answered.
+ */
+function logUsage(gate, model, tail) {
+  try {
+    // Brace-counted rather than matched by regex. The usage object nests
+    // prompt_tokens_details inside it, and a regex that stops at the first
+    // closing brace truncates the JSON one character short of valid - which is
+    // exactly what it did, silently, until a test fed it a real event.
+    const at = tail.lastIndexOf('"usage"')
+    if (at === -1) return
+    const open = tail.indexOf('{', at)
+    if (open === -1) return
+
+    let depth = 0
+    let close = -1
+    for (let i = open; i < tail.length; i++) {
+      if (tail[i] === '{') depth++
+      else if (tail[i] === '}' && --depth === 0) {
+        close = i
+        break
+      }
+    }
+    if (close === -1) return
+
+    const usage = JSON.parse(tail.slice(open, close + 1))
+    const cached = usage.prompt_tokens_details?.cached_tokens ?? 0
+    console.log(
+      `[usage] ledger=${gate.ledger} model=${model} ` +
+        `prompt=${usage.prompt_tokens ?? 0} cached=${cached} ` +
+        `completion=${usage.completion_tokens ?? 0} total=${usage.total_tokens ?? 0}`
+    )
+  } catch {
+    /* usage is a nicety; never let it break the response */
+  }
 }
