@@ -1,4 +1,5 @@
-import { json, remainingMs, requireLiveTrial } from '../_lib/trial.js'
+import { requireQuota } from '../_lib/quota.js'
+import { json } from '../_lib/trial.js'
 
 /**
  * POST /api/trial/realtime-token  { deviceId }  ->  { token, expiresAt, remainingMs }
@@ -14,13 +15,16 @@ import { json, remainingMs, requireLiveTrial } from '../_lib/trial.js'
 export default async function handler(req, res) {
   if (req.method !== 'POST') return json(res, 405, { error: 'method-not-allowed' })
 
-  const gate = await requireLiveTrial(req, res)
+  // Gated for licensed devices too, and refused once their balance is spent.
+  // Transcription is the expensive half: without this an empty licence could
+  // still open a realtime socket and keep billing.
+  const gate = await requireQuota(req, res)
   if (!gate) return
 
   const upstream = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      Authorization: `Bearer ${gate.apiKey}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
@@ -44,6 +48,7 @@ export default async function handler(req, res) {
   return json(res, 200, {
     token: payload.value ?? payload.client_secret?.value,
     expiresAt: payload.expires_at ?? payload.client_secret?.expires_at ?? null,
-    remainingMs: remainingMs(gate.record)
+    remainingMs: gate.remainingMs,
+    ledger: gate.ledger
   })
 }

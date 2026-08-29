@@ -1,7 +1,8 @@
+import { balanceFor } from '../_lib/quota.js'
 import { claim, isValidDeviceId, json, readJson, remainingMs, TRIAL_MS } from '../_lib/trial.js'
 
 /**
- * POST /api/trial/claim  { deviceId }  ->  { remainingMs, totalMs, fresh }
+ * POST /api/trial/claim  { deviceId }  ->  { remainingMs, totalMs, ledger, fresh }
  *
  * Called once at app start. Registers the machine if it has never been seen
  * and reports what is left. Reinstalling produces the same deviceId, finds the
@@ -17,11 +18,26 @@ export default async function handler(req, res) {
   const { deviceId, appVersion } = await readJson(req)
   if (!isValidDeviceId(deviceId)) return json(res, 400, { error: 'bad-device-id' })
 
+  // A licensed device is answered from the licence ledger, not the trial one.
+  // It has almost always spent its trial, so answering with trial numbers
+  // would tell a paying customer they have nothing left - and the client is
+  // built to distrust exactly that, which is what `ledger` is for.
+  const licence = await balanceFor(deviceId)
+  if (licence) {
+    return json(res, 200, {
+      remainingMs: licence.remainingMs,
+      totalMs: licence.totalMs,
+      ledger: 'licence',
+      fresh: false
+    })
+  }
+
   const { record, fresh } = await claim(deviceId, appVersion ? { appVersion } : {})
 
   return json(res, 200, {
     remainingMs: remainingMs(record),
     totalMs: TRIAL_MS,
+    ledger: 'trial',
     fresh
   })
 }

@@ -121,28 +121,8 @@ export function json(res, status, body) {
 }
 
 /**
- * Shared guard for the two endpoints that spend the vendor's money. Returns
- * the record, or ends the response and returns null.
+ * The shared money-spending guard used to live here and checked the trial
+ * only. It moved to _lib/quota.js when licences became metered: a licensed
+ * device has almost always spent its trial, so a trial-only gate refuses the
+ * people who paid. See requireQuota there.
  */
-export async function requireLiveTrial(req, res) {
-  const body = await readJson(req)
-  // Header first, so the chat endpoint can take a stock OpenAI request body
-  // and stay usable as a plain `baseURL` from the SDK.
-  const deviceId = req.headers['x-sage-device'] || body.deviceId
-
-  if (!isValidDeviceId(deviceId)) {
-    json(res, 400, { error: 'bad-device-id' })
-    return null
-  }
-  if (!process.env.OPENAI_API_KEY) {
-    json(res, 500, { error: 'server-misconfigured' })
-    return null
-  }
-
-  const { record } = await claim(deviceId)
-  if (remainingMs(record) <= 0) {
-    json(res, 402, { error: 'trial-exhausted', remainingMs: 0 })
-    return null
-  }
-  return { record, body }
-}

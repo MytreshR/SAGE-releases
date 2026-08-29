@@ -2,9 +2,10 @@ import { createPrivateKey, sign } from 'crypto'
 import { create, get } from './_lib/store.js'
 import { isValidDeviceId, json, readJson } from './_lib/trial.js'
 import { readKey } from './_lib/keys.js'
+import { grant, LICENCE_MS, remainingMs } from './_lib/licence.js'
 
 /**
- * POST /api/activate  { key, deviceId }  ->  { token, serial }
+ * POST /api/activate  { key, deviceId }  ->  { token, serial, remainingMs }
  *
  * Redeems an activation key, once and once only.
  *
@@ -77,7 +78,22 @@ export default async function handler(req, res) {
   const token = signActivation(serial, deviceId)
   if (!token) return json(res, 500, { error: 'signing-failed' })
 
-  return json(res, 200, { token, serial })
+  // A licence is five hours of listening rather than a permanent unlock, so
+  // redeeming has to credit the balance as well as sign the token.
+  //
+  // Keys stack - a second key on this machine is another five hours - but the
+  // same key must only ever grant once. The clause above deliberately lets a
+  // machine re-redeem its own key as often as it likes, because that is a
+  // reinstall rather than a second sale, and without the serial list on the
+  // record every reinstall would mint another five hours for free.
+  const balance = await grant(deviceId, serial)
+
+  return json(res, 200, {
+    token,
+    serial,
+    remainingMs: remainingMs(balance),
+    grantedMs: LICENCE_MS
+  })
 }
 
 /**
