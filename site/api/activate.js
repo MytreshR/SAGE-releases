@@ -2,7 +2,7 @@ import { createPrivateKey, sign } from 'crypto'
 import { create, get } from './_lib/store.js'
 import { isValidDeviceId, json, readJson } from './_lib/trial.js'
 import { readKey } from './_lib/keys.js'
-import { grant, LICENCE_MS, remainingMs } from './_lib/licence.js'
+import { grant, hoursForSerial, msForSerial, remainingMs } from './_lib/licence.js'
 
 /**
  * POST /api/activate  { key, deviceId }  ->  { token, serial, remainingMs }
@@ -78,8 +78,9 @@ export default async function handler(req, res) {
   const token = signActivation(serial, deviceId)
   if (!token) return json(res, 500, { error: 'signing-failed' })
 
-  // A licence is five hours of listening rather than a permanent unlock, so
-  // redeeming has to credit the balance as well as sign the token.
+  // A licence is listening time rather than a permanent unlock, so redeeming
+  // has to credit the balance as well as sign the token. How much is decided
+  // by the serial's tier band - see licence.js.
   //
   // Keys stack - a second key on this machine is another five hours - but the
   // same key must only ever grant once. The clause above deliberately lets a
@@ -92,7 +93,8 @@ export default async function handler(req, res) {
     token,
     serial,
     remainingMs: remainingMs(balance),
-    grantedMs: LICENCE_MS
+    grantedMs: msForSerial(serial),
+    hours: hoursForSerial(serial)
   })
 }
 

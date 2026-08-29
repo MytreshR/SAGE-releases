@@ -19,8 +19,35 @@ import { get, set } from './store.js'
  * a balance on the customer's disk is one they can edit.
  */
 
-/** One key buys this much. 5 hours, matching the $14.99 the page sells. */
-export const LICENCE_MS = Number(process.env.SAGE_LICENCE_MS || 5 * 60 * 60 * 1000)
+/**
+ * How much a key is worth, decided by its serial.
+ *
+ * There are two tiers on sale and a key has to say which it is. It cannot be
+ * looked up: the whole point of the key format is that validity is answered by
+ * arithmetic - a truncated HMAC over the serial - so keys can be minted
+ * offline, in any quantity, with nothing stored until one is actually redeemed.
+ * Adding a database lookup for the tier would throw that away.
+ *
+ * So the tier rides in the serial itself, as a band. The serial space is 40
+ * bits, about 1.1 trillion, and a band is a billion - room for a thousand
+ * tiers that will never be needed and a billion sales per tier that will never
+ * happen.
+ *
+ * Band 0 is every key issued before tiers existed. Those were sold as a
+ * permanent unlock, so they get the larger allowance rather than the smaller.
+ */
+export const TIER_BAND = 1_000_000_000
+
+const TIER_HOURS = {
+  0: 5, // legacy keys, issued before tiers
+  1: 3, // $14.99
+  2: 5 // $17.99
+}
+
+/** Hours a serial is worth, defaulting to the larger tier if the band is unknown. */
+export const hoursForSerial = (serial) => TIER_HOURS[Math.floor(serial / TIER_BAND)] ?? 5
+
+export const msForSerial = (serial) => hoursForSerial(serial) * 60 * 60 * 1000
 
 /**
  * Longest a single heartbeat may deduct. Same reasoning as the trial's cap and
@@ -70,7 +97,7 @@ export async function grant(deviceId, serial) {
   }
 
   record.serials.push(serial)
-  record.grantedMs += LICENCE_MS
+  record.grantedMs += msForSerial(serial)
   record.lastSeenAt = now
   await set(key, record)
   return record
