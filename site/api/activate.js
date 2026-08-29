@@ -62,21 +62,26 @@ export default async function handler(req, res) {
     return json(res, 403, { error: 'key-revoked' })
   }
 
-  // A key minted by a sandbox purchase, presented to a live deployment.
+  // A key minted by a sandbox purchase.
   //
-  // Test purchases mint real keys - the minting knows nothing about Stripe's
-  // modes - so testing checkout twenty times leaves twenty working keys behind,
-  // and they look exactly like keys somebody paid for. Rather than expecting
-  // whoever launches to remember to clean those up, they simply stop working
-  // the moment the deployment is running on a live Stripe key.
+  // Refused by default, and that default is the whole point. Stripe's test card
+  // numbers are public documentation - 4242 is merely the famous one - so while
+  // the deployment is in test mode, a Buy button on a live website is an
+  // invitation to mint free keys. The stolen price does not matter; the three
+  // to five hours of inference behind each key does, and that is billed to us
+  // the moment somebody activates.
+  //
+  // Set SAGE_ALLOW_TEST_KEYS=1 to activate one deliberately while testing the
+  // flow end to end, then remove it. Forgetting is survivable rather than
+  // expensive: these keys also stop working on their own once the deployment
+  // moves to a live Stripe key.
   //
   // Hand-minted keys are unaffected: they have no sale record at all, which is
-  // what distinguishes "issued deliberately" from "left behind by a test".
+  // what distinguishes "issued deliberately" from "produced by a test".
   const sale = await get(`sage:sale:${serial}`)
-  const liveDeployment = String(process.env.STRIPE_SECRET_KEY || '').startsWith('sk_live_')
-  if (sale && sale.livemode === false && liveDeployment) {
-    console.warn(`[activation] refused test-mode key #${serial} on a live deployment`)
-    return json(res, 403, { error: 'key-revoked' })
+  if (sale && sale.livemode === false && process.env.SAGE_ALLOW_TEST_KEYS !== '1') {
+    console.warn(`[activation] refused test-mode key #${serial}`)
+    return json(res, 403, { error: 'key-not-valid-here' })
   }
 
   const record = {
