@@ -3,6 +3,7 @@ import { get, incr, set } from './_lib/store.js'
 import { json } from './_lib/trial.js'
 import { MANUAL_RESERVE, packFor, TIER_BAND } from './_lib/packs.js'
 import { readRaw, verifyWebhook } from './_lib/stripe.js'
+import { revokeSerial } from './_lib/revoke.js'
 
 /**
  * POST /api/stripe-webhook  ->  200
@@ -30,6 +31,30 @@ export default async function handler(req, res) {
   if (!event) {
     console.warn('[stripe] rejected a webhook with a bad or missing signature')
     return json(res, 400, { error: 'bad-signature' })
+  }
+
+  // Money going back out. A key minted for a payment that was later refunded
+  // or disputed has to stop working - otherwise the shape of the attack is
+  // simply: pay with a stolen card, activate within seconds, spend the hours,
+  // and let the real cardholder dispute it three weeks later.
+  if (
+    event.type === 'charge.refunded' ||
+    event.type === 'charge.dispute.created' ||
+    event.type === 'charge.dispute.funds_withdrawn'
+  ) {
+    const charge = event.data?.object
+    // A dispute names the charge; a refund is the charge. Either way the
+    // payment intent is what ties it back to the checkout session.
+    const paymentIntent = charge?.payment_intent || charge?.charge?.payment_intent
+    const order = paymentIntent ? await get(`sage:pi:${paymentIntent}`) : null
+
+    if (!order) {
+      console.warn(`[stripe] ${event.type} for an order we cannot find`, paymentIntent)
+      return json(res, 200, { unmatched: true })
+    }
+
+    await revokeSerial(order.serial, event.type)
+    return json(res, 200, { revoked: order.serial })
   }
 
   // Everything else Stripe sends is acknowledged and ignored. Answering 200 is
@@ -91,6 +116,7 @@ export default async function handler(req, res) {
     currency: session.currency,
     email: session.customer_details?.email ?? null,
     sessionId,
+    paymentIntent: session.payment_intent ?? null,
     paidAt: new Date().toISOString()
   }
 
@@ -98,6 +124,11 @@ export default async function handler(req, res) {
   // Also filed by serial, so a support question that arrives with a key rather
   // than a receipt can still be answered.
   await set(`sage:sale:${serial}`, order)
+  // And by payment intent, because that is the only identifier a refund or a
+  // dispute carries - neither of them mentions the checkout session at all.
+  if (session.payment_intent) {
+    await set(`sage:pi:${session.payment_intent}`, order)
+  }
 
   console.log(`[stripe] ${sessionId} -> key #${serial} (${pack.hours}h) for ${order.email}`)
   return json(res, 200, { fulfilled: true })

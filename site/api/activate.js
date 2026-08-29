@@ -3,6 +3,7 @@ import { create, get } from './_lib/store.js'
 import { isValidDeviceId, json, readJson } from './_lib/trial.js'
 import { readKey } from './_lib/keys.js'
 import { grant, hoursForSerial, msForSerial, remainingMs } from './_lib/licence.js'
+import { isRevoked } from './_lib/revoke.js'
 
 /**
  * POST /api/activate  { key, deviceId }  ->  { token, serial, remainingMs }
@@ -52,6 +53,13 @@ export default async function handler(req, res) {
     // Deliberately the same answer for "made up" and "mistyped". Telling them
     // apart would let someone probe which prefixes are real.
     return json(res, 400, { error: 'invalid-key' })
+  }
+
+  // Refunded, disputed, or reversed. The arithmetic still says this is a key
+  // we issued - it always will, because the proof is in the serial - so the
+  // only thing that can stop it is the ledger saying the money went away.
+  if (await isRevoked(serial)) {
+    return json(res, 403, { error: 'key-revoked' })
   }
 
   const record = {
