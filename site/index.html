@@ -743,6 +743,402 @@
           var(--bg-soft);
       }
 
+
+      /* ---------- product shots ---------- */
+
+      /* The window really is transparent - the rounded shell is drawn in the
+         app's own CSS - so these PNGs carry alpha and sit on whatever is
+         behind them, shadow and all. No frame is drawn here on purpose: one
+         would be a second, fake window edge around a real one. */
+      .shot {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 14px;
+        filter: drop-shadow(0 24px 60px rgba(0, 0, 0, 0.55));
+      }
+
+      .hero-shot {
+        position: relative;
+        max-width: 62rem;
+        margin: 3.5rem auto 0;
+        padding: 0 1rem;
+      }
+
+      /* A pool of light under the panel, so it reads as floating over the page
+         rather than pasted onto it. */
+      .hero-shot::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 12%;
+        width: 78%;
+        height: 70%;
+        transform: translateX(-50%);
+        background: radial-gradient(closest-side, rgba(124, 108, 255, 0.34), transparent 72%);
+        filter: blur(48px);
+        z-index: -1;
+      }
+
+      .beats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+        gap: 1.3rem;
+        margin-top: 2.4rem;
+      }
+
+      .beat {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 1.7rem 1.7rem 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Pushes the shot to the bottom, so three cards of unequal copy still
+         line their images up. */
+      .beat p { flex: 1 0 auto; }
+
+      .beat h3 {
+        font-size: 1.12rem;
+        letter-spacing: -0.01em;
+        margin: 0 0 0.55rem;
+      }
+
+      .beat p {
+        color: var(--dim);
+        font-size: 0.92rem;
+        line-height: 1.6;
+        margin: 0 0 1.5rem;
+        max-width: 30rem;
+      }
+
+      /* Scaled past the card and bled off two edges, so the card is a window
+         onto the app rather than a thumbnail of it. At card width the whole
+         900px screenshot shrinks until the text is decoration - and a
+         screenshot nobody can read is worse than no screenshot, because it
+         looks like detail while carrying none. Cropped to the top left, which
+         is where the question and the first line of the answer live. */
+      .beat .shot {
+        width: 158%;
+        max-width: none;
+        margin-bottom: -10%;
+        border-radius: 12px 0 0 0;
+        transform-origin: top left;
+      }
+
+      /* The screen-share comparison. Two identical frames; the difference is
+         the whole argument, so they are shown side by side rather than
+         described. */
+      .share {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.3rem;
+        margin-top: 2.4rem;
+      }
+
+      .screen {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        overflow: hidden;
+        background: #0b0b12;
+      }
+
+      .screen-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.7rem 1rem;
+        border-bottom: 1px solid var(--line);
+        font-size: 0.78rem;
+        color: var(--dim);
+      }
+
+      .screen-bar b {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex: none;
+      }
+
+      .screen-body {
+        position: relative;
+        aspect-ratio: 16 / 10;
+        display: grid;
+        place-items: center;
+        padding: 1.1rem;
+        background:
+          radial-gradient(120% 90% at 50% 0%, rgba(124, 108, 255, 0.14), transparent 60%),
+          linear-gradient(180deg, #151521, #0d0d16);
+      }
+
+      .screen-body .shot {
+        filter: drop-shadow(0 14px 34px rgba(0, 0, 0, 0.6));
+      }
+
+      .screen-empty {
+        color: #4b4a5e;
+        font-size: 0.86rem;
+        text-align: center;
+        line-height: 1.6;
+      }
+
+      .screen-cap {
+        padding: 0.9rem 1rem 1.1rem;
+        font-size: 0.84rem;
+        color: var(--dim);
+        border-top: 1px solid var(--line);
+      }
+
+
+      /* ---------- live demo ---------- */
+
+      /* An interview playing out, rather than a paragraph about one. Built in
+         the page rather than shipped as a video: it is a few kilobytes instead
+         of several megabytes, it stays sharp at any size, and it can be paused
+         when the tab is hidden so it costs nothing to leave on the page.
+
+         Deliberately no photographs of people. A stock face implies a customer
+         who does not exist; two labelled tiles say "this is a diagram" and are
+         honest about it. */
+      .demo {
+        position: relative;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        overflow: hidden;
+        background: linear-gradient(180deg, #14141f, #0c0c14);
+        margin-top: 2.4rem;
+      }
+
+      .demo-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.75rem 1.1rem;
+        border-bottom: 1px solid var(--line);
+        font-size: 0.8rem;
+        color: var(--dim);
+      }
+
+      .demo-live {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-left: auto;
+        color: #f87171;
+        font-weight: 600;
+        font-size: 0.74rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .demo-live i {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+        animation: rec 1.6s ease-in-out infinite;
+      }
+
+      @keyframes rec {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.25; }
+      }
+
+      .demo-stage {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.9rem;
+        padding: 1.1rem;
+      }
+
+      .tile {
+        position: relative;
+        aspect-ratio: 4 / 3;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        display: grid;
+        place-items: center;
+        background: linear-gradient(160deg, #1b1b2b, #101019);
+        overflow: hidden;
+        transition: border-color 0.35s ease, box-shadow 0.35s ease;
+      }
+
+      /* Whoever is speaking is ringed, the way a call does it. This is the only
+         cue that says which line of the transcript belongs to whom. */
+      .tile.speaking {
+        border-color: rgba(124, 108, 255, 0.75);
+        box-shadow: 0 0 0 3px rgba(124, 108, 255, 0.16);
+      }
+
+      /* Fills the tile the way a camera feed would, rather than sitting in the
+         middle of it as an icon. */
+      .cam {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      /* The speaker brightens slightly - a camera does not, but a still
+         drawing needs some way to answer "who is talking" beyond the ring. */
+      .tile .cam {
+        filter: saturate(0.82) brightness(0.78);
+        transition: filter 0.35s ease;
+      }
+
+      .tile.speaking .cam {
+        filter: saturate(1) brightness(1);
+      }
+
+      .tile-name {
+        position: absolute;
+        left: 0.7rem;
+        bottom: 0.6rem;
+        font-size: 0.74rem;
+        color: var(--dim);
+        background: rgba(0, 0, 0, 0.45);
+        padding: 0.16rem 0.5rem;
+        border-radius: 5px;
+      }
+
+      /* Bars, driven by one keyframe with a per-bar delay. Only animating
+         while .speaking is on, so a silent tile is genuinely still rather than
+         quietly burning a compositor thread. */
+      .wave {
+        position: absolute;
+        right: 0.7rem;
+        bottom: 0.6rem;
+        display: flex;
+        align-items: flex-end;
+        gap: 2px;
+        height: 15px;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+      }
+
+      .tile.speaking .wave { opacity: 1; }
+
+      .wave span {
+        width: 2.5px;
+        height: 30%;
+        border-radius: 2px;
+        background: var(--indigo);
+      }
+
+      .tile.speaking .wave span {
+        animation: bar 0.9s ease-in-out infinite;
+      }
+
+      @keyframes bar {
+        0%, 100% { height: 22%; }
+        50% { height: 100%; }
+      }
+
+      .demo-transcript {
+        border-top: 1px solid var(--line);
+        padding: 0.95rem 1.2rem;
+        font-size: 0.9rem;
+        color: var(--muted);
+        min-height: 3.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .demo-transcript .who {
+        flex: none;
+        font-size: 0.72rem;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--dim);
+      }
+
+      /* The SAGE panel, over the call, exactly where it sits in life. */
+      .demo-panel {
+        position: absolute;
+        left: 50%;
+        bottom: 4.6rem;
+        width: min(30rem, 82%);
+        transform: translate(-50%, 10px);
+        opacity: 0;
+        transition: opacity 0.35s ease, transform 0.35s ease;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(12, 12, 18, 0.93);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 22px 50px rgba(0, 0, 0, 0.6);
+        padding: 0.85rem 1rem 0.95rem;
+        pointer-events: none;
+      }
+
+      .demo-panel.up {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+
+      .demo-q {
+        font-size: 0.76rem;
+        color: var(--dim);
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.6rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+      }
+
+      .demo-a {
+        font-size: 0.88rem;
+        line-height: 1.6;
+        color: #ececf3;
+        min-height: 4.4rem;
+      }
+
+      .demo-a .caret {
+        display: inline-block;
+        width: 2px;
+        height: 0.95em;
+        background: #ececf3;
+        vertical-align: -2px;
+        margin-left: 1px;
+        animation: rec 1s steps(1) infinite;
+      }
+
+      .demo-foot {
+        border-top: 1px solid var(--line);
+        padding: 0.8rem 1.2rem;
+        font-size: 0.8rem;
+        color: var(--dim);
+        display: flex;
+        gap: 1.4rem;
+        flex-wrap: wrap;
+      }
+
+      .demo-foot b {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      @media (max-width: 620px) {
+        .demo-panel { width: 92%; bottom: 3.6rem; }
+        .demo-a { font-size: 0.82rem; }
+      }
+
+      /* Someone who has asked for less motion gets the end state, not the
+         performance: the panel sits open with the answer already on it. */
+      @media (prefers-reduced-motion: reduce) {
+        .demo-live i,
+        .tile.speaking .wave span,
+        .demo-a .caret {
+          animation: none;
+        }
+      }
+
       /* ---------- footer ---------- */
       footer {
         border-top: 1px solid var(--line-soft);
@@ -858,6 +1254,17 @@
         </div>
         <p class="cta-note">13 minutes free · 95 MB · No API key needed, ever</p>
 
+        <div class="hero-shot reveal">
+          <img
+            class="shot"
+            src="/img/sage-intro.png"
+            width="1800"
+            height="940"
+            alt="The SAGE window during an interview. The question reads &quot;So, tell me a bit about
+                 yourself&quot;, with the answer to say streaming underneath it."
+          />
+        </div>
+
         <div class="wave" aria-hidden="true">
           <i style="animation-delay: 0s"></i>
           <i style="animation-delay: 0.12s"></i>
@@ -882,6 +1289,246 @@
       </div>
 
       <!-- how it works -->
+
+
+      <!-- live demo -->
+      <section class="wrap" id="demo">
+        <div class="reveal">
+          <p class="eyebrow">Watch it work</p>
+          <h2>A question, and the answer before they finish</h2>
+          <p class="lead">
+            This is the real sequence, at the real speed: the question is picked out of the
+            conversation, and the answer is on screen while the room is still quiet.
+          </p>
+        </div>
+
+        <div class="demo reveal">
+          <div class="demo-bar">
+            <span class="dot" style="background: #4ade80"></span>
+            Interview · Senior Engineer
+            <span class="demo-live"><i></i> Live</span>
+          </div>
+
+          <div class="demo-stage">
+            <div class="tile" id="t-them">
+              <svg class="cam" viewBox="0 0 200 150" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <defs>
+                  <linearGradient id="bga" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#20203070" />
+                    <stop offset="1" stop-color="#0e0e1690" />
+                  </linearGradient>
+                  <linearGradient id="topa" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#2f3d5e" />
+                    <stop offset="1" stop-color="#1f2a42" />
+                  </linearGradient>
+                  <linearGradient id="haira" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#241c18" />
+                    <stop offset="1" stop-color="#3b2e26" />
+                  </linearGradient>
+                </defs>
+                <rect width="200" height="150" fill="url(#bga)" />
+                <!-- shoulders -->
+                <path d="M42 150c0-26 26-40 58-40s58 14 58 40z" fill="url(#topa)" />
+                <!-- neck -->
+                <path d="M88 96h24v20c0 6-24 6-24 0z" fill="#a9754f" />
+                <!-- head -->
+                <ellipse cx="100" cy="74" rx="27" ry="31" fill="#c9926b" />
+                <!-- ears -->
+                <ellipse cx="73" cy="76" rx="4" ry="6" fill="#a9754f" />
+                <ellipse cx="127" cy="76" rx="4" ry="6" fill="#a9754f" />
+                <path d="M73 70c0-19 12-30 27-30s27 11 27 30c0-9-8-13-27-13s-27 4-27 13z"
+                  fill="url(#haira)" />
+                <!-- eyes -->
+                <ellipse cx="90" cy="72" rx="2.6" ry="3" fill="#2b2b33" />
+                <ellipse cx="110" cy="72" rx="2.6" ry="3" fill="#2b2b33" />
+                <!-- brows -->
+                <path d="M85 65q5-3 10 0" stroke="#241c18" stroke-width="1.8" fill="none" stroke-linecap="round" />
+                <path d="M105 65q5-3 10 0" stroke="#241c18" stroke-width="1.8" fill="none" stroke-linecap="round" />
+                <!-- mouth -->
+                <path d="M93 87q7 5 14 0" stroke="#a9754f" stroke-width="2" fill="none" stroke-linecap="round" />
+                <path d="M78 118h44" stroke="#ffffff18" stroke-width="2" stroke-linecap="round" />
+              </svg>
+              <span class="tile-name">Interviewer</span>
+              <span class="wave" aria-hidden="true"
+                ><span style="animation-delay: 0s"></span><span style="animation-delay: 0.1s"></span
+                ><span style="animation-delay: 0.2s"></span><span style="animation-delay: 0.3s"></span
+                ><span style="animation-delay: 0.15s"></span
+              ></span>
+            </div>
+            <div class="tile" id="t-you">
+              <svg class="cam" viewBox="0 0 200 150" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <defs>
+                  <linearGradient id="bgb" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#20203070" />
+                    <stop offset="1" stop-color="#0e0e1690" />
+                  </linearGradient>
+                  <linearGradient id="topb" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#3d4650" />
+                    <stop offset="1" stop-color="#282f37" />
+                  </linearGradient>
+                  <linearGradient id="hairb" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#4a3328" />
+                    <stop offset="1" stop-color="#6b4a38" />
+                  </linearGradient>
+                </defs>
+                <rect width="200" height="150" fill="url(#bgb)" />
+                <!-- shoulders -->
+                <path d="M42 150c0-26 26-40 58-40s58 14 58 40z" fill="url(#topb)" />
+                <!-- neck -->
+                <path d="M88 96h24v20c0 6-24 6-24 0z" fill="#c9977a" />
+                <!-- head -->
+                <ellipse cx="100" cy="74" rx="27" ry="31" fill="#e6b592" />
+                <!-- ears -->
+                <ellipse cx="73" cy="76" rx="4" ry="6" fill="#c9977a" />
+                <ellipse cx="127" cy="76" rx="4" ry="6" fill="#c9977a" />
+                <path d="M71 78c-2-26 10-40 29-40s31 14 29 40c-2-14-3-20-6-24-6 5-32 7-44-1-4 4-6 11-8 25z"
+                  fill="url(#hairb)" />
+                <path d="M71 78q-3 18 2 30l6-2q-5-14-4-28z" fill="url(#hairb)" />
+                <path d="M129 78q3 18-2 30l-6-2q5-14 4-28z" fill="url(#hairb)" />
+                <!-- eyes -->
+                <ellipse cx="90" cy="72" rx="2.6" ry="3" fill="#2b2b33" />
+                <ellipse cx="110" cy="72" rx="2.6" ry="3" fill="#2b2b33" />
+                <!-- brows -->
+                <path d="M85 65q5-3 10 0" stroke="#4a3328" stroke-width="1.8" fill="none" stroke-linecap="round" />
+                <path d="M105 65q5-3 10 0" stroke="#4a3328" stroke-width="1.8" fill="none" stroke-linecap="round" />
+                <!-- mouth -->
+                <path d="M93 87q7 5 14 0" stroke="#c9977a" stroke-width="2" fill="none" stroke-linecap="round" />
+                
+              </svg>
+              <span class="tile-name">You</span>
+              <span class="wave" aria-hidden="true"
+                ><span style="animation-delay: 0.05s"></span><span style="animation-delay: 0.2s"></span
+                ><span style="animation-delay: 0.1s"></span><span style="animation-delay: 0.3s"></span
+                ><span style="animation-delay: 0.25s"></span
+              ></span>
+            </div>
+
+            <div class="demo-panel" id="d-panel" aria-hidden="true">
+              <div class="demo-q" id="d-q"></div>
+              <div class="demo-a" id="d-a"></div>
+            </div>
+          </div>
+
+          <div class="demo-transcript">
+            <span class="who" id="d-who">Listening</span>
+            <span id="d-line"></span>
+          </div>
+
+          <div class="demo-foot">
+            <span><b>Hidden</b> from screen sharing</span>
+            <span><b>~0.7s</b> to the first word</span>
+            <span><b>Your resume</b>, not a generic answer</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- What it does, shown rather than described. Both images are real
+           screenshots of the running application, not mockups. -->
+      <section class="wrap" id="see">
+        <div class="reveal">
+          <p class="eyebrow">In the room</p>
+          <h2>What it looks like mid-interview</h2>
+          <p class="lead">
+            Two things happen while they are still talking: the question is picked out of the
+            conversation, and the answer starts arriving before they finish asking it.
+          </p>
+        </div>
+
+        <div class="beats reveal">
+          <div class="beat">
+            <h3>It picks the question out</h3>
+            <p>
+              Small talk, filler and your own voice trigger nothing. When a real question lands it
+              goes up on screen and the answer starts, before the room has gone quiet.
+            </p>
+            <img
+              class="shot"
+              src="/img/sage-detect.png"
+              width="1800"
+              height="600"
+              alt="SAGE showing a detected question, with the answer still arriving."
+            />
+          </div>
+
+          <div class="beat">
+            <h3>Written the way you would say it</h3>
+            <p>
+              From your own resume, not a generic answer off the internet — your projects, your
+              numbers, in the first person. Streaming word by word so you can start talking.
+            </p>
+            <img
+              class="shot"
+              src="/img/sage-intro.png"
+              width="1800"
+              height="940"
+              alt="SAGE answering &quot;tell me about yourself&quot; from the user's own background."
+            />
+          </div>
+
+          <div class="beat">
+            <h3>Coding rounds too</h3>
+            <p>
+              Press Screenshot on a shared problem and it reads the screen: a working solution, the
+              complexity, and the thing to say out loud about why.
+            </p>
+            <img
+              class="shot"
+              src="/img/sage-code.png"
+              width="1800"
+              height="1040"
+              alt="SAGE answering a Two Sum screenshot with a Python solution and its complexity."
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- The one claim worth showing rather than stating. -->
+      <section class="wrap" id="invisible">
+        <div class="reveal">
+          <p class="eyebrow">Screen sharing</p>
+          <h2>On your screen. Not on theirs.</h2>
+          <p class="lead">
+            The window is excluded from screen capture at the OS level, so it does not appear in
+            Zoom, Teams or Meet — and it stays out of the taskbar and Alt-Tab.
+          </p>
+        </div>
+
+        <div class="share reveal">
+          <div class="screen">
+            <div class="screen-bar">
+              <span class="dot" style="background: #4ade80"></span>
+              <b>Your screen</b>
+            </div>
+            <div class="screen-body">
+              <img
+                class="shot"
+                src="/img/sage-code.png"
+                width="1800"
+                height="1040"
+                alt="Your own screen, with the SAGE panel visible over the call."
+              />
+            </div>
+            <div class="screen-cap">The answer is right there, on top of the call.</div>
+          </div>
+
+          <div class="screen">
+            <div class="screen-bar">
+              <span class="dot" style="background: #f87171"></span>
+              <b>What they see when you share</b>
+            </div>
+            <div class="screen-body">
+              <p class="screen-empty">
+                Nothing.<br />
+                The window is not in the captured frame.
+              </p>
+            </div>
+            <div class="screen-cap">
+              It cannot hide a second monitor, your eyes, or a proctor watching the room.
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="how" class="wrap">
         <div class="reveal">
           <p class="eyebrow">How it works</p>
@@ -1475,6 +2122,176 @@
         })
         document.addEventListener('keydown', function (e) {
           if (e.key === 'Escape' && !sheet.hidden) closeSheet()
+        })
+      })()
+    </script>
+
+    <script>
+      ;(function () {
+        var panel = document.getElementById('d-panel')
+        if (!panel) return
+
+        var qEl = document.getElementById('d-q')
+        var aEl = document.getElementById('d-a')
+        var whoEl = document.getElementById('d-who')
+        var lineEl = document.getElementById('d-line')
+        var them = document.getElementById('t-them')
+        var you = document.getElementById('t-you')
+
+        // Three rounds, cycled, because a loop that asks the same question
+        // forever reads as a video on repeat rather than a product working.
+        // One behavioural, one system design, one on their own CV - the three
+        // shapes an interview actually takes.
+        var ROUNDS = [
+          {
+            q: 'So, tell me about a time you disagreed with your tech lead.',
+            a:
+              'On the payments rewrite my lead wanted to migrate everyone at once. ' +
+              'I thought that was risky, so I proposed running both paths for a week ' +
+              'and diffing the outputs. It caught a rounding bug on refunds that ' +
+              'would have hit about 300 customers.'
+          },
+          {
+            q: 'How would you design a rate limiter for a public API?',
+            a:
+              'Token bucket per API key, because it tolerates bursts where a fixed ' +
+              'window does not. State in Redis rather than in the process, or four ' +
+              'instances behind a load balancer each let the same client through. ' +
+              'And return Retry-After, so a well-behaved client backs off instead ' +
+              'of hammering you while you are already degraded.'
+          },
+          {
+            q: 'I see you moved from backend to platform work. Why the change?',
+            a:
+              'I kept finding that the slow part was never the code. We would ship a ' +
+              'service in a week and spend three getting it deployed safely. So I ' +
+              'started fixing that instead, and the whole team shipped faster than ' +
+              'I ever could on my own.'
+          }
+        ]
+
+        var round = 0
+
+        var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+        var timers = []
+        var running = false
+
+        function at(ms, fn) {
+          timers.push(setTimeout(fn, ms))
+        }
+
+        function clearAll() {
+          timers.forEach(clearTimeout)
+          timers = []
+        }
+
+        // One character at a time, resolving when the string is on screen, so
+        // the sequence below reads as the order things actually happen.
+        function type(el, text, speed, done) {
+          var i = 0
+          el.textContent = ''
+          ;(function step() {
+            if (!running) return
+            el.textContent = text.slice(0, ++i)
+            if (i < text.length) timers.push(setTimeout(step, speed))
+            else if (done) timers.push(setTimeout(done, 120))
+          })()
+        }
+
+        function rest() {
+          clearAll()
+          them.classList.remove('speaking')
+          you.classList.remove('speaking')
+          panel.classList.remove('up')
+          qEl.textContent = ''
+          aEl.textContent = ''
+          lineEl.textContent = ''
+          whoEl.textContent = 'Listening'
+        }
+
+        function play() {
+          rest()
+          running = true
+
+          // They ask.
+          var QUESTION = ROUNDS[round].q
+          var ANSWER = ROUNDS[round].a
+
+          them.classList.add('speaking')
+          whoEl.textContent = 'Interviewer'
+          type(lineEl, QUESTION, 38, function () {
+            them.classList.remove('speaking')
+
+            // The question is recognised as one, and the panel comes up.
+            at(260, function () {
+              qEl.textContent = 'Q: ' + QUESTION
+              aEl.innerHTML = '<span class="caret"></span>'
+              panel.classList.add('up')
+              whoEl.textContent = 'SAGE'
+              lineEl.textContent = 'Question detected - answering'
+            })
+
+            // The answer arrives while the room is still quiet.
+            at(900, function () {
+              var caret = '<span class="caret"></span>'
+              var i = 0
+              ;(function step() {
+                if (!running) return
+                aEl.innerHTML = ANSWER.slice(0, ++i) + caret
+                if (i < ANSWER.length) timers.push(setTimeout(step, 16))
+                else {
+                  aEl.innerHTML = ANSWER
+                  you.classList.add('speaking')
+                  whoEl.textContent = 'You'
+                  lineEl.textContent = 'Reading it out'
+                  at(2600, function () {
+                    round = (round + 1) % ROUNDS.length
+                    if (running) play()
+                  })
+                }
+              })()
+            })
+          })
+        }
+
+        function stop() {
+          running = false
+          clearAll()
+        }
+
+        if (reduced) {
+          // The end state rather than the performance.
+          qEl.textContent = 'Q: ' + ROUNDS[0].q
+          aEl.textContent = ROUNDS[0].a
+          panel.classList.add('up')
+          whoEl.textContent = 'SAGE'
+          lineEl.textContent = 'Answer ready'
+          return
+        }
+
+        // Only runs while it is on screen and the tab is in front. An animation
+        // looping in a background tab is a battery cost for nobody's benefit.
+        var visible = false
+        var io = new IntersectionObserver(
+          function (entries) {
+            visible = entries[0].isIntersecting
+            if (visible && !document.hidden) {
+              if (!running) play()
+            } else {
+              stop()
+            }
+          },
+          // threshold 0, not a fraction: the demo is taller than a laptop
+          // viewport, so "35% of it visible" is a condition that can never be
+          // true, and the observer reported it off-screen while it filled the
+          // window. It stopped mid-answer and never restarted.
+          { threshold: 0 }
+        )
+        io.observe(panel.closest('.demo'))
+
+        document.addEventListener('visibilitychange', function () {
+          if (document.hidden) stop()
+          else if (visible && !running) play()
         })
       })()
     </script>
