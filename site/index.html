@@ -1183,7 +1183,7 @@
               <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Buy another key any time; hours stack up</span></li>
               <li style="color: var(--dim)">&mdash; About three interviews</li>
             </ul>
-            <a class="btn btn-ghost" style="justify-content: center" href="mailto:mytresh1984@outlook.com?subject=SAGE%20activation%20key%20-%203%20hours&body=Hi%20Mytresh%2C%0A%0AI%27d%20like%20to%20buy%20a%203-hour%20key%20for%20SAGE.%0A%0A">Buy 3 hours</a>
+            <button class="btn btn-ghost buy" data-hours="3" style="justify-content: center; width: 100%">Buy 3 hours</button>
           </div>
 
           <div class="tier featured">
@@ -1199,7 +1199,7 @@
               <li style="color: var(--dim)">&mdash; Two extra hours for $3 more</li>
               <li style="color: var(--dim)">&mdash; One key activates one computer</li>
             </ul>
-            <a class="btn btn-primary" style="justify-content: center" href="mailto:mytresh1984@outlook.com?subject=SAGE%20activation%20key%20-%205%20hours&body=Hi%20Mytresh%2C%0A%0AI%27d%20like%20to%20buy%20a%205-hour%20key%20for%20SAGE.%0A%0A">Buy 5 hours</a>
+            <button class="btn btn-primary buy" data-hours="5" style="justify-content: center; width: 100%">Buy 5 hours</button>
           </div>
         </div>
 
@@ -1309,6 +1309,39 @@
         { threshold: 0.12 }
       );
       document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+    </script>
+      <script>
+      // Buying goes through Stripe Checkout. The price is decided by the
+      // server from the hours, never sent from here - a client-supplied
+      // amount is a client-controlled amount.
+      document.querySelectorAll('.buy').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const original = btn.textContent
+          btn.disabled = true
+          btn.textContent = 'Opening checkout…'
+          try {
+            const res = await fetch('/api/checkout', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ hours: Number(btn.dataset.hours) })
+            })
+            const data = await res.json()
+            if (data.url) {
+              location.href = data.url
+              return
+            }
+            throw new Error(data.error || 'checkout-failed')
+          } catch (err) {
+            // Falls back to the address that has always worked, rather than
+            // leaving someone who wants to pay with a dead button.
+            btn.textContent = original
+            btn.disabled = false
+            const subject = 'SAGE activation key - ' + btn.dataset.hours + ' hours'
+            location.href =
+              'mailto:mytresh1984@outlook.com?subject=' + encodeURIComponent(subject)
+          }
+        })
+      })
     </script>
   </body>
 </html>

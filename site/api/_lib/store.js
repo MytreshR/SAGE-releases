@@ -50,6 +50,24 @@ export async function set(key, value) {
 }
 
 /**
+ * Atomic increment, returning the new value.
+ *
+ * This is how serials are handed out once keys are minted by a webhook rather
+ * than by hand. GET-then-SET would be a race, and the failure is expensive and
+ * silent: two people paying at the same moment get the same serial, which is
+ * the same key, and the second to activate is told their key is already in use
+ * on another computer. They paid and got a support ticket.
+ */
+export async function incr(key) {
+  if (!isPersistent) {
+    const next = (memory.get(key) ?? 0) + 1
+    memory.set(key, next)
+    return next
+  }
+  return Number(await command('INCR', key))
+}
+
+/**
  * Create only if absent, reporting whether this call was the one that created
  * it. SETNX rather than GET-then-SET: two installers racing on the same
  * machine must not both be told they got a fresh trial.
