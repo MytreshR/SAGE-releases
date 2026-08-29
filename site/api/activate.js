@@ -62,6 +62,23 @@ export default async function handler(req, res) {
     return json(res, 403, { error: 'key-revoked' })
   }
 
+  // A key minted by a sandbox purchase, presented to a live deployment.
+  //
+  // Test purchases mint real keys - the minting knows nothing about Stripe's
+  // modes - so testing checkout twenty times leaves twenty working keys behind,
+  // and they look exactly like keys somebody paid for. Rather than expecting
+  // whoever launches to remember to clean those up, they simply stop working
+  // the moment the deployment is running on a live Stripe key.
+  //
+  // Hand-minted keys are unaffected: they have no sale record at all, which is
+  // what distinguishes "issued deliberately" from "left behind by a test".
+  const sale = await get(`sage:sale:${serial}`)
+  const liveDeployment = String(process.env.STRIPE_SECRET_KEY || '').startsWith('sk_live_')
+  if (sale && sale.livemode === false && liveDeployment) {
+    console.warn(`[activation] refused test-mode key #${serial} on a live deployment`)
+    return json(res, 403, { error: 'key-revoked' })
+  }
+
   const record = {
     serial,
     deviceId,

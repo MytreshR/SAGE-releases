@@ -117,6 +117,13 @@ export default async function handler(req, res) {
     email: session.customer_details?.email ?? null,
     sessionId,
     paymentIntent: session.payment_intent ?? null,
+    // Which Stripe mode minted this. A sandbox purchase produces a genuinely
+    // valid key - mintKey knows nothing about test versus live, and
+    // SAGE_KEY_SECRET is one variable shared by both - so without recording
+    // this, every test purchase leaves a real key in circulation that is
+    // indistinguishable from a paid one. activate.js refuses these once the
+    // deployment is running on a live Stripe key.
+    livemode: event.livemode === true,
     paidAt: new Date().toISOString()
   }
 
@@ -130,6 +137,9 @@ export default async function handler(req, res) {
     await set(`sage:pi:${session.payment_intent}`, order)
   }
 
-  console.log(`[stripe] ${sessionId} -> key #${serial} (${pack.hours}h) for ${order.email}`)
+  console.log(
+    `[stripe] ${sessionId} -> key #${serial} (${pack.hours}h) for ${order.email}` +
+      (order.livemode ? '' : ' [TEST MODE - dies when you go live]')
+  )
   return json(res, 200, { fulfilled: true })
 }
