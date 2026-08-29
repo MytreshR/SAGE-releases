@@ -53,7 +53,18 @@ export default async function handler(req, res) {
             unit_amount: pack.amount,
             product_data: {
               name: `SAGE - ${pack.hours} hours`,
-              description: `${pack.hours} hours of live listening time. Hours stack and do not expire.`
+              description: `${pack.hours} hours of live listening time. Hours stack and do not expire.`,
+              // Required by Managed Payments, and not a formality: Stripe is
+              // the merchant of record, so it has to work out VAT and sales
+              // tax per jurisdiction, and the rate depends on what is being
+              // sold. Without it the session is refused outright.
+              //
+              // The default is SaaS for personal use, which is what this is -
+              // the download is free, and what is bought is hours of a hosted
+              // service. Overridable because the right code is a tax question,
+              // not an engineering one, and getting it wrong is the sort of
+              // thing that is expensive years later rather than today.
+              tax_code: process.env.SAGE_TAX_CODE || 'txcd_10103001'
             }
           }
         }
