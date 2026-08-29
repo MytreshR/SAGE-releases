@@ -759,6 +759,58 @@
         flex-wrap: wrap;
       }
 
+      /* Columns rather than a row of links. auto-fit so it becomes two columns
+         on a tablet and one on a phone without a breakpoint for each. */
+      .foot-cols {
+        display: grid;
+        grid-template-columns: 1.4fr repeat(auto-fit, minmax(150px, 1fr));
+        gap: 2.4rem 2rem;
+        padding-bottom: 2.4rem;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid var(--line-soft);
+      }
+
+      .foot-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        font-size: 0.82rem;
+        color: var(--muted);
+        text-decoration: none;
+      }
+
+      .foot-tag {
+        margin-top: 0.9rem;
+        max-width: 17rem;
+        font-size: 0.82rem;
+        line-height: 1.55;
+        color: var(--dim);
+      }
+
+      .foot-col h4 {
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text);
+        margin: 0 0 0.9rem;
+      }
+
+      .foot-col ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+      }
+
+      .foot-col a {
+        font-size: 0.86rem;
+      }
+
       footer a {
         color: var(--muted);
         text-decoration: none;
@@ -1278,13 +1330,62 @@
     </main>
 
     <footer>
+      <div class="wrap">
+        <div class="foot-cols">
+          <div>
+            <a class="foot-brand" href="#top">
+              <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true">
+                <rect width="24" height="24" rx="6" fill="#5B4BE8" />
+                <g fill="#fff">
+                  <rect x="4.2" y="8.4" width="2.1" height="7.2" rx="1.05" />
+                  <rect x="7.6" y="5.8" width="2.1" height="12.5" rx="1.05" />
+                  <rect x="11" y="3.4" width="2.1" height="17.3" rx="1.05" />
+                  <rect x="14.4" y="5.8" width="2.1" height="12.5" rx="1.05" />
+                  <rect x="17.8" y="8.4" width="2.1" height="7.2" rx="1.05" />
+                </g>
+              </svg>
+              SAGE
+            </a>
+            <p class="foot-tag">
+              Answers on screen while they are still asking. Hidden from screen sharing.
+            </p>
+          </div>
+
+          <div class="foot-col">
+            <h4>Product</h4>
+            <ul>
+              <li><a href="/download" data-sheet="releases">Download</a></li>
+              <li><a href="#pricing">Pricing</a></li>
+              <li><a href="#features">Features</a></li>
+              <li><a href="#how">How it works</a></li>
+            </ul>
+          </div>
+
+          <div class="foot-col">
+            <h4>Get started</h4>
+            <ul>
+              <li><a href="#setup">Setup</a></li>
+              <li><a href="#faq">FAQ</a></li>
+              <li><a href="#source">Source licensing</a></li>
+            </ul>
+          </div>
+
+          <div class="foot-col">
+            <h4>Support</h4>
+            <ul>
+              <li><a href="mailto:mytresh1984@outlook.com" data-sheet="contact">Contact</a></li>
+              <li>
+                <a href="mailto:mytresh1984@outlook.com?subject=SAGE%20-%20problem%20report"
+                  >Report a problem</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <div class="wrap foot">
         <div>© 2026 Mytresh Ravi. All rights reserved.</div>
-        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap">
-          <a href="/download" data-sheet="releases">Releases</a>
-          <a href="mailto:mytresh1984@outlook.com" data-sheet="contact">Contact</a>
-          <a href="/licence.html" data-sheet="licence">Licence</a>
-        </div>
       </div>
       <div class="wrap" style="margin-top: 1.4rem; max-width: 46rem; color: #575567; font-size: 0.8rem">
         SAGE is a tool for preparation and live assistance. Some interview processes and proctored
@@ -1441,16 +1542,6 @@
               'mid-interview: say so in the subject line and it gets looked at first.</p>' +
               '<div class="row">' +
               '<a class="primary" href="mailto:mytresh1984@outlook.com?subject=SAGE">Email us</a>' +
-              '</div>'
-          },
-          licence: {
-            title: 'Licence',
-            html:
-              '<p>Proprietary. Install and run it on machines you own; the source is not ' +
-              'licensed for reuse.</p>' +
-              '<div class="row">' +
-              '<a class="primary" href="/licence.html">Full licence</a>' +
-              '<a href="mailto:mytresh1984@outlook.com?subject=SAGE%20source%20licensing">Licence the source</a>' +
               '</div>'
           }
         }
