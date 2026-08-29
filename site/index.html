@@ -1281,9 +1281,9 @@
       <div class="wrap foot">
         <div>© 2026 Mytresh Ravi. All rights reserved.</div>
         <div style="display: flex; gap: 1.5rem; flex-wrap: wrap">
-          <a href="https://github.com/MytreshR/SAGE-releases/releases">Releases</a>
-          <a href="mailto:mytresh1984@outlook.com">Contact</a>
-          <a href="https://github.com/MytreshR/SAGE-releases#licence">Licence</a>
+          <a href="https://github.com/MytreshR/SAGE-releases/releases" data-sheet="releases">Releases</a>
+          <a href="mailto:mytresh1984@outlook.com" data-sheet="contact">Contact</a>
+          <a href="/licence.html" data-sheet="licence">Licence</a>
         </div>
       </div>
       <div class="wrap" style="margin-top: 1.4rem; max-width: 46rem; color: #575567; font-size: 0.8rem">
@@ -1342,6 +1342,156 @@
           }
         })
       })
+    </script>
+    <!-- Footer sheet. The links keep a real href, so a middle-click, a copied
+         link and a browser without JS all still reach somewhere; the handler
+         only intercepts an ordinary left click. -->
+    <div id="sheet" hidden>
+      <div id="sheet-card" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <button id="sheet-close" aria-label="Close">&times;</button>
+        <h3 id="sheet-title"></h3>
+        <div id="sheet-body"></div>
+      </div>
+    </div>
+
+    <style>
+      #sheet {
+        position: fixed;
+        inset: 0;
+        background: rgba(4, 4, 8, 0.72);
+        backdrop-filter: blur(3px);
+        display: grid;
+        place-items: center;
+        padding: 1.5rem;
+        z-index: 200;
+      }
+      #sheet[hidden] { display: none; }
+      #sheet-card {
+        position: relative;
+        width: 100%;
+        max-width: 430px;
+        background: #10101a;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 14px;
+        padding: 1.7rem 1.7rem 1.5rem;
+        animation: sheet-in 0.16s ease-out;
+      }
+      @keyframes sheet-in {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: none; }
+      }
+      #sheet-card h3 { font-size: 1.1rem; margin: 0 0 0.7rem; letter-spacing: -0.01em; }
+      #sheet-body { font-size: 0.9rem; line-height: 1.6; color: #9a9aa5; }
+      #sheet-body p { margin: 0 0 0.8rem; }
+      #sheet-body b { color: #f2f2f5; font-weight: 600; }
+      #sheet-body a { color: #7c6cff; }
+      #sheet-body .row { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1.2rem; }
+      #sheet-body .row a {
+        text-decoration: none;
+        font-size: 0.84rem;
+        font-weight: 600;
+        padding: 0.5rem 0.9rem;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #f2f2f5;
+      }
+      #sheet-body .row a.primary { background: #5b4be8; border-color: #5b4be8; }
+      #sheet-close {
+        position: absolute;
+        top: 0.8rem;
+        right: 0.9rem;
+        background: none;
+        border: 0;
+        color: #9a9aa5;
+        font-size: 1.4rem;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0.2rem 0.4rem;
+      }
+      #sheet-close:hover { color: #f2f2f5; }
+    </style>
+
+    <script>
+      (function () {
+        var sheet = document.getElementById('sheet')
+        var card = document.getElementById('sheet-card')
+        var titleEl = document.getElementById('sheet-title')
+        var bodyEl = document.getElementById('sheet-body')
+        var closeBtn = document.getElementById('sheet-close')
+        var lastFocus = null
+
+        var CONTENT = {
+          releases: {
+            title: 'Releases',
+            html:
+              '<p>SAGE is <b>Windows 10 and 11</b>, about 95 MB. It updates itself: it looks ' +
+              'for a new version at start-up, downloads it in the background, and installs it ' +
+              'the next time you close the app, never during a session.</p>' +
+              '<div class="row">' +
+              '<a class="primary" href="https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.1.1-setup.exe">Download</a>' +
+              '<a href="https://github.com/MytreshR/SAGE-releases/releases">All versions</a>' +
+              '</div>'
+          },
+          contact: {
+            title: 'Contact',
+            html:
+              '<p>One person builds and answers for SAGE, so replies come from a human, ' +
+              'usually within a day.</p>' +
+              '<p><b>mytresh1984@outlook.com</b></p>' +
+              '<p>A lost key, a purchase that did not arrive, or something broken ' +
+              'mid-interview: say so in the subject line and it gets looked at first.</p>' +
+              '<div class="row">' +
+              '<a class="primary" href="mailto:mytresh1984@outlook.com?subject=SAGE">Email us</a>' +
+              '</div>'
+          },
+          licence: {
+            title: 'Licence',
+            html:
+              '<p>SAGE is proprietary software, distributed as a compiled application. You may ' +
+              'install and run it on machines you own; the source is not licensed for reuse.</p>' +
+              '<p>Parts of it derive from MIT-licensed work by Elias Soykat, credited in full ' +
+              'in the licence text.</p>' +
+              '<p>The source is available to licence commercially if you want to build on it.</p>' +
+              '<div class="row">' +
+              '<a class="primary" href="/licence.html">Read the full licence</a>' +
+              '<a href="mailto:mytresh1984@outlook.com?subject=SAGE%20source%20licensing">Licence the source</a>' +
+              '</div>'
+          }
+        }
+
+        function openSheet(name, trigger) {
+          var item = CONTENT[name]
+          if (!item) return
+          titleEl.textContent = item.title
+          bodyEl.innerHTML = item.html
+          lastFocus = trigger || null
+          sheet.hidden = false
+          closeBtn.focus()
+        }
+
+        function closeSheet() {
+          sheet.hidden = true
+          if (lastFocus) lastFocus.focus()
+        }
+
+        document.querySelectorAll('[data-sheet]').forEach(function (link) {
+          link.addEventListener('click', function (e) {
+            // Anything that means "open this elsewhere" is left alone: a
+            // modifier or a non-left button should still get the real href.
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+            e.preventDefault()
+            openSheet(link.getAttribute('data-sheet'), link)
+          })
+        })
+
+        closeBtn.addEventListener('click', closeSheet)
+        sheet.addEventListener('click', function (e) {
+          if (!card.contains(e.target)) closeSheet()
+        })
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && !sheet.hidden) closeSheet()
+        })
+      })()
     </script>
   </body>
 </html>

@@ -75,6 +75,9 @@ SAGE is proprietary software, distributed as a compiled application. **This
 repository hosts release downloads only — it does not contain source code**, and
 the source is not licensed for reuse or derivative works.
 
+Portions derive from interview-copilot by Elias Soykat, used under the MIT
+Licence and credited in full in the `LICENSE` file that ships with the app.
+
 **Interested in the source?** It is available for licensing — $499.99 for the
 current release, or $1,999.99 for the full source including every future version.
 Enquiries welcome; please get in touch rather than extracting it:
