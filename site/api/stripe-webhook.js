@@ -99,18 +99,36 @@ export default async function handler(req, res) {
     return json(res, 500, { error: 'server-misconfigured' })
   }
 
-  // Atomic, because two people paying in the same second must not be handed
-  // the same serial - which is the same key, and the second to activate is
-  // told it is already in use on another computer.
-  // Offset past the hand-minted range, so a sale can never be issued a serial
-  // that has already been printed to a CSV and given to somebody.
-  const withinBand = await incr(`sage:serial:${pack.band}`)
-  const serial = pack.band * TIER_BAND + MANUAL_RESERVE + withinBand
-  const key = mintKey(process.env.SAGE_KEY_SECRET, serial)
+  // A sandbox purchase mints nothing real.
+  //
+  // Stripe's test card numbers are public, so while the deployment is in test
+  // mode anyone who finds the Buy button can complete a purchase for free. A
+  // placeholder is handed back instead of a key: nothing to activate, nothing
+  // to leak, and no serial burned - the counter is not touched either, so the
+  // numbering stays clean for real sales.
+  //
+  // SAGE_ALLOW_TEST_KEYS=1 turns real minting back on, for when the whole
+  // chain needs testing end to end again.
+  const placeholder = event.livemode !== true && process.env.SAGE_ALLOW_TEST_KEYS !== '1'
+
+  let serial = null
+  let key = 'SAGE-XXXX-XXXX-XXXX-XXXX'
+
+  if (!placeholder) {
+    // Atomic, because two people paying in the same second must not be handed
+    // the same serial - which is the same key, and the second to activate is
+    // told it is already in use on another computer.
+    // Offset past the hand-minted range, so a sale can never be issued a serial
+    // that has already been printed to a CSV and given to somebody.
+    const withinBand = await incr(`sage:serial:${pack.band}`)
+    serial = pack.band * TIER_BAND + MANUAL_RESERVE + withinBand
+    key = mintKey(process.env.SAGE_KEY_SECRET, serial)
+  }
 
   const order = {
     serial,
     key,
+    placeholder,
     hours: pack.hours,
     amount: session.amount_total,
     currency: session.currency,
@@ -128,18 +146,25 @@ export default async function handler(req, res) {
   }
 
   await set(keyFor(sessionId), order)
-  // Also filed by serial, so a support question that arrives with a key rather
-  // than a receipt can still be answered.
-  await set(`sage:sale:${serial}`, order)
-  // And by payment intent, because that is the only identifier a refund or a
-  // dispute carries - neither of them mentions the checkout session at all.
-  if (session.payment_intent) {
-    await set(`sage:pi:${session.payment_intent}`, order)
+
+  // The by-serial and by-payment-intent records exist to answer support
+  // questions and to revoke on a refund. A placeholder has neither a serial
+  // nor anything to revoke, so it gets neither.
+  if (!placeholder) {
+    // Filed by serial, so a support question that arrives with a key rather
+    // than a receipt can still be answered.
+    await set(`sage:sale:${serial}`, order)
+    // And by payment intent, because that is the only identifier a refund or a
+    // dispute carries - neither of them mentions the checkout session at all.
+    if (session.payment_intent) {
+      await set(`sage:pi:${session.payment_intent}`, order)
+    }
   }
 
   console.log(
-    `[stripe] ${sessionId} -> key #${serial} (${pack.hours}h) for ${order.email}` +
-      (order.livemode ? '' : ' [TEST MODE - dies when you go live]')
+    placeholder
+      ? `[stripe] ${sessionId} -> placeholder, no key minted (test purchase, ${pack.hours}h)`
+      : `[stripe] ${sessionId} -> key #${serial} (${pack.hours}h) for ${order.email}`
   )
   return json(res, 200, { fulfilled: true })
 }

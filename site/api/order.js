@@ -54,6 +54,9 @@ export default async function handler(req, res) {
   return json(res, 200, {
     key: order.key,
     hours: order.hours,
-    email: order.email
+    email: order.email,
+    // So the page can say plainly that this was a test rather than showing a
+    // row of Xs as though it were something to paste.
+    placeholder: order.placeholder === true
   })
 }

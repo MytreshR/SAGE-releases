@@ -164,6 +164,29 @@
           (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
         )
 
+      function showPlaceholder({ key, hours }) {
+        // A test purchase. Showing a row of Xs with a Copy button beside it
+        // would look exactly like a real key that had failed to render, so it
+        // says what happened instead.
+        body.innerHTML = `
+          <h1>Test purchase completed</h1>
+          <p class="sub">Payment went through in Stripe's sandbox. No money moved, and
+          no real key was issued.</p>
+          <div class="keybox">
+            <code style="opacity:.55">${escape(key)}</code>
+          </div>
+          <ol>
+            <li>Checkout, the webhook and the ${hours}-hour tier all worked.</li>
+            <li>Real keys are minted once the deployment is on a live Stripe key.</li>
+          </ol>
+          <p class="note">
+            Seeing this on the live site by mistake? That means the deployment is
+            still using test Stripe keys —
+            <a href="mailto:mytresh1984@outlook.com?subject=SAGE%20-%20test%20mode%20on%20live%20site">tell us</a>
+            and we will sort it out.
+          </p>`
+      }
+
       function showKey({ key, hours, email }) {
         body.innerHTML = `
           <h1>Thank you — here is your key</h1>
@@ -247,6 +270,7 @@
                   : 'We could not find that order.'
               )
             }
+            if (data.placeholder) return showPlaceholder(data)
             showKey(data)
           } catch {
             if (attempt < 5) return setTimeout(ask, 1500)
