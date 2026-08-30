@@ -8,8 +8,9 @@
       name="description"
       content="What SAGE collects, what it does not, and who else sees it. SAGE does not store your audio, transcripts or answers."
     />
-    <meta name="theme-color" content="#07070c" />
+    <meta name="theme-color" content="#fbfdff" />
     <link rel="canonical" href="https://www.sagemeeting-ai.xyz/privacy.html" />
+    <link rel="stylesheet" href="/mark.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -22,15 +23,15 @@
     />
     <style>
       :root {
-        --bg: #07070c;
-        --panel: rgba(255, 255, 255, 0.028);
-        --line: rgba(255, 255, 255, 0.09);
-        --line-soft: rgba(255, 255, 255, 0.055);
-        --text: #edecf5;
-        --muted: #9b99ad;
-        --dim: #6e6c80;
-        --indigo: #818cf8;
-        --good: #4ade80;
+        --bg: #fbfdff;
+        --panel: #ffffff;
+        --line: rgba(12, 40, 74, 0.11);
+        --line-soft: rgba(12, 40, 74, 0.06);
+        --text: #0b2545;
+        --muted: #46607f;
+        --dim: #7b93ae;
+        --indigo: #0369a1;
+        --good: #059669;
       }
       * {
         box-sizing: border-box;
@@ -52,7 +53,7 @@
         z-index: 0;
         background: radial-gradient(
           55rem 34rem at 20% -12%,
-          rgba(99, 102, 241, 0.13),
+          rgba(14, 165, 233, 0.1),
           transparent 60%
         );
       }
@@ -129,13 +130,14 @@
         border-radius: 14px;
         padding: 1.3rem 1.5rem;
         margin: 1.6rem 0;
+        box-shadow: 0 1px 2px rgba(12, 40, 74, 0.04);
       }
       .callout p:last-child {
         margin-bottom: 0;
       }
       .callout.strong {
-        border-color: rgba(74, 222, 128, 0.25);
-        background: rgba(74, 222, 128, 0.05);
+        border-color: rgba(5, 150, 105, 0.28);
+        background: rgba(5, 150, 105, 0.05);
       }
       table {
         width: 100%;
@@ -185,17 +187,16 @@
     <div class="wrap">
       <header>
         <a class="mark" href="/">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-            <rect width="24" height="24" rx="6" fill="#5B4BE8" />
-            <g fill="#fff">
-              <rect x="4.2" y="8.4" width="2.1" height="7.2" rx="1.05" />
-              <rect x="7.6" y="5.8" width="2.1" height="12.5" rx="1.05" />
-              <rect x="11" y="3.4" width="2.1" height="17.3" rx="1.05" />
-              <rect x="14.4" y="5.8" width="2.1" height="12.5" rx="1.05" />
-              <rect x="17.8" y="8.4" width="2.1" height="7.2" rx="1.05" />
-            </g>
-          </svg>
-          SAGE
+          <span class="sage-mark">
+            <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+              <rect class="sage-bar" style="--i: 0" x="4.2" y="8.4" width="2.1" height="7.2" rx="1.05" />
+              <rect class="sage-bar" style="--i: 1" x="7.6" y="5.8" width="2.1" height="12.5" rx="1.05" />
+              <rect class="sage-bar" style="--i: 2" x="11" y="3.4" width="2.1" height="17.3" rx="1.05" />
+              <rect class="sage-bar" style="--i: 3" x="14.4" y="5.8" width="2.1" height="12.5" rx="1.05" />
+              <rect class="sage-bar" style="--i: 4" x="17.8" y="8.4" width="2.1" height="7.2" rx="1.05" />
+            </svg>
+            <span class="sage-word" aria-hidden="true">SAGE</span>
+          </span>
         </a>
       </header>
 

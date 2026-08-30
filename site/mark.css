@@ -1,0 +1,88 @@
+/**
+ * The SAGE mark, alive.
+ *
+ * The same five-capsule waveform the app draws in its title bar, animated the
+ * same way — a travelling wave through the bars and on into the letters, over a
+ * slow hue rotation. Ported from SageLogo.tsx and main.css in the app so the
+ * website and the product read as one thing rather than two drawings that
+ * happen to look alike. Keep the numbers here in step with those: bar geometry,
+ * the 110ms stagger, and the 40° hue step.
+ *
+ * Every bar and letter carries a single custom property, `--i`, which is its
+ * position in the wave. Hue and delay are both derived from it, so a mark
+ * cannot end up with its colour running one way and its motion the other.
+ *
+ * Shared by every page rather than pasted into each. There are four of them
+ * now, and four copies of an animation is four chances for one to drift.
+ */
+
+.sage-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* How hard and how fast the wave swings. Overridden on hover so the mark
+   answers the cursor — the app does the same thing while a session is live. */
+.sage-mark {
+  --sage-dur: 2.6s;
+  --sage-low: 0.72;
+  /* Sky through to blue, and nothing else.
+     The app runs the full spectrum here, which suits a small live indicator
+     over dark glass. On a white marketing page a five-colour wordmark does not
+     read as a rainbow; it reads as a font that failed to load. So the mark
+     keeps its motion and gives up its rainbow. */
+  --sage-hue: 199;
+  --sage-hue-step: 5;
+  --sage-sat: 88%;
+  --sage-light: 52%;
+}
+
+a:hover > .sage-mark,
+a.sage-mark:hover {
+  --sage-dur: 1.15s;
+  --sage-low: 0.42;
+}
+
+/* transform-box is what makes a CSS transform on an SVG rect scale about its
+   own centre rather than the viewBox origin — without it the bars slide out of
+   the mark instead of pulsing in place. */
+.sage-bar {
+  transform-box: fill-box;
+  transform-origin: center;
+  fill: hsl(calc(var(--sage-hue) + var(--i) * var(--sage-hue-step)) var(--sage-sat) var(--sage-light));
+  animation: sage-bar var(--sage-dur) ease-in-out infinite;
+  animation-delay: calc(var(--i) * 110ms);
+}
+
+/* Solid, and still. The bars are what say "listening"; a wordmark that also
+   hops is two things competing for the same glance, and at 13px the hop reads
+   as jitter rather than as a wave. */
+.sage-word {
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: var(--text, #0b2545);
+  margin-right: -0.2em;
+}
+
+.sage-word i {
+  font-style: normal;
+}
+
+@keyframes sage-bar {
+  0%,
+  100% {
+    transform: scaleY(var(--sage-low));
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* A logo that will not sit still is a real problem for some people, and this
+   one moves on every page. Motion off, colour kept. */
+@media (prefers-reduced-motion: reduce) {
+  .sage-bar {
+    animation: none;
+  }
+}

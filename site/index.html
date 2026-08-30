@@ -13,7 +13,7 @@
       name="description"
       content="SAGE listens to your interview, works out when a question has been asked, and puts an answer on screen you can say out loud. Hidden from screen sharing."
     />
-    <meta property="og:title" content="SAGE — Speech Answer Generation Engine" />
+    <meta property="og:title" content="SAGE Speech Answer Generation Engine" />
     <meta
       property="og:description"
       content="A desktop assistant for live interviews. Answers on screen before they finish asking."
@@ -23,8 +23,9 @@
     <meta property="og:url" content="https://sage-desktop.vercel.app/" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://sage-desktop.vercel.app/og.png" />
-    <meta name="theme-color" content="#07070c" />
+    <meta name="theme-color" content="#fbfdff" />
     <link rel="canonical" href="https://sage-desktop.vercel.app/" />
+    <link rel="stylesheet" href="/mark.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -37,17 +38,37 @@
     />
     <style>
       :root {
-        --bg: #07070c;
-        --bg-soft: #0d0d16;
-        --panel: rgba(255, 255, 255, 0.028);
-        --line: rgba(255, 255, 255, 0.09);
-        --line-soft: rgba(255, 255, 255, 0.055);
-        --text: #edecf5;
-        --muted: #9b99ad;
-        --dim: #6e6c80;
-        --indigo: #818cf8;
-        --violet: #c084fc;
-        --grad: linear-gradient(135deg, #818cf8, #a78bfa 45%, #c084fc);
+        /* White and sky blue.
+           Not pure white as the ground: #fbfdff carries a few points of blue,
+           so the white cards sitting on it read as raised rather than merging
+           into it. Pure #fff is reserved for the surfaces that should lift. */
+        --bg: #fbfdff;
+        --bg-soft: #f1f7fe;
+        --panel: #ffffff;
+        --panel-2: #f4f9ff;
+        /* Borders are navy at low alpha, never grey. Grey hairlines on a blue
+           white go dirty; navy at 10% stays a shadow of the text colour. */
+        --line: rgba(12, 40, 74, 0.11);
+        --line-soft: rgba(12, 40, 74, 0.06);
+        --line-strong: rgba(12, 40, 74, 0.2);
+        /* Deep navy, not black. Black on white is harsh at body sizes and
+           reads as a document; navy reads as a product. */
+        --text: #0b2545;
+        --muted: #46607f;
+        --dim: #7b93ae;
+        --sky: #0ea5e9;
+        --sky-deep: #0369a1;
+        --indigo: #2563eb;
+        /* The wide gradient is for text and marks, where the range is what
+           makes it look lit. */
+        --grad: linear-gradient(135deg, #38bdf8, #0ea5e9 42%, #2563eb);
+        /* Buttons get a much tighter one. A cyan-to-blue sweep across a solid
+           button reads as a 2010 web gradient; two neighbouring blues read as
+           one confident colour with a little depth. */
+        --grad-btn: linear-gradient(180deg, #0ea5e9, #0273b8);
+        --lift: linear-gradient(180deg, #ffffff, #f4faff);
+        --shadow-sm: 0 1px 2px rgba(12, 40, 74, 0.05), 0 4px 14px -6px rgba(12, 40, 74, 0.1);
+        --shadow-md: 0 2px 6px rgba(12, 40, 74, 0.06), 0 18px 44px -18px rgba(12, 40, 74, 0.22);
         --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
         --maxw: 1120px;
       }
@@ -70,17 +91,36 @@
         overflow-x: hidden;
       }
 
-      /* Ambient light behind the page. Fixed so it does not scroll away. */
+      /* Ambient light behind the page. On white this is a wash rather than a
+         glow: broad, pale, low-alpha sky and blue that tint the paper instead
+         of lighting a dark room. Above 0.1 it stops looking like light and
+         starts looking like a printed background. */
       body::before {
         content: '';
         position: fixed;
-        inset: 0;
+        inset: -20%;
         pointer-events: none;
         z-index: 0;
         background:
-          radial-gradient(60rem 40rem at 18% -10%, rgba(99, 102, 241, 0.17), transparent 60%),
-          radial-gradient(50rem 35rem at 88% 8%, rgba(168, 85, 247, 0.13), transparent 60%),
-          radial-gradient(40rem 30rem at 50% 105%, rgba(129, 140, 248, 0.08), transparent 60%);
+          radial-gradient(55rem 38rem at 14% 2%, rgba(14, 165, 233, 0.1), transparent 62%),
+          radial-gradient(48rem 34rem at 88% 8%, rgba(37, 99, 235, 0.075), transparent 62%),
+          radial-gradient(44rem 30rem at 62% 94%, rgba(56, 189, 248, 0.08), transparent 62%);
+        animation: drift 26s ease-in-out infinite alternate;
+      }
+
+      @keyframes drift {
+        from {
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+        to {
+          transform: translate3d(0, -2.5%, 0) scale(1.06);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        body::before {
+          animation: none;
+        }
       }
 
       .wrap {
@@ -174,8 +214,10 @@
         position: sticky;
         top: 0;
         z-index: 50;
-        backdrop-filter: blur(14px);
-        background: rgba(7, 7, 12, 0.72);
+        backdrop-filter: blur(14px) saturate(1.6);
+        /* Translucent white rather than solid, so the page tinting the header
+           as it scrolls under it is visible — that is what the blur is for. */
+        background: rgba(255, 255, 255, 0.78);
         border-bottom: 1px solid var(--line-soft);
       }
 
@@ -238,6 +280,16 @@
         color: var(--text);
       }
 
+      /* An email address is long and arbitrary, and it must never be allowed to
+         push the Download button off a narrow header. */
+      .nav-signin.signed-in {
+        max-width: 14rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--text);
+      }
+
       /* Under 760px the links used to be hidden with nothing in their place,
          which left phone users no way to navigate. Now they scroll. */
       @media (max-width: 760px) {
@@ -294,14 +346,36 @@
       }
 
       .btn-primary {
-        background: var(--grad);
-        color: #14121f;
-        box-shadow: 0 8px 30px -10px rgba(129, 140, 248, 0.75);
+        background: var(--grad-btn);
+        /* White on saturated blue. The old dark-on-pale-gradient washed the
+           label out wherever the gradient reached its lightest point, which on
+           the widest buttons was directly behind the text. */
+        color: #ffffff;
+        /* Two shadows: a tight bright one that reads as the button glowing,
+           and a wide soft one that lifts it off the page. One shadow doing
+           both jobs has to compromise on the radius and does neither. */
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.22),
+          0 1px 2px rgba(2, 115, 184, 0.28),
+          0 8px 20px -8px rgba(2, 115, 184, 0.5);
+        transition:
+          transform 0.18s ease,
+          box-shadow 0.18s ease,
+          filter 0.18s ease;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.06);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.28),
+          0 1px 2px rgba(2, 115, 184, 0.32),
+          0 12px 26px -8px rgba(2, 115, 184, 0.55);
       }
 
       .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 16px 42px -12px rgba(168, 85, 247, 0.75);
+        box-shadow: 0 16px 42px -12px rgba(37, 99, 235, 0.75);
       }
 
       .btn-ghost {
@@ -311,7 +385,7 @@
       }
 
       .btn-ghost:hover {
-        border-color: rgba(255, 255, 255, 0.24);
+        border-color: var(--line-strong);
         transform: translateY(-2px);
       }
 
@@ -486,7 +560,7 @@
 
       .card {
         border: 1px solid var(--line-soft);
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012));
+        background: var(--lift);
         border-radius: 15px;
         padding: 1.6rem;
         transition:
@@ -495,7 +569,7 @@
       }
 
       .card:hover {
-        border-color: rgba(129, 140, 248, 0.42);
+        border-color: rgba(14, 165, 233, 0.42);
         transform: translateY(-3px);
       }
 
@@ -517,8 +591,8 @@
         border-radius: 10px;
         display: grid;
         place-items: center;
-        background: rgba(129, 140, 248, 0.13);
-        border: 1px solid rgba(129, 140, 248, 0.24);
+        background: rgba(14, 165, 233, 0.13);
+        border: 1px solid rgba(14, 165, 233, 0.24);
       }
 
       /* ---------- pipeline ---------- */
@@ -552,8 +626,8 @@
         font-size: 0.82rem;
         font-weight: 700;
         font-family: var(--mono);
-        background: rgba(129, 140, 248, 0.14);
-        border: 1px solid rgba(129, 140, 248, 0.3);
+        background: rgba(14, 165, 233, 0.14);
+        border: 1px solid rgba(14, 165, 233, 0.3);
         color: var(--indigo);
       }
 
@@ -572,11 +646,11 @@
       /* ---------- done-for-you setup ---------- */
       .service {
         margin-top: 2.6rem;
-        border: 1px solid rgba(129, 140, 248, 0.3);
+        border: 1px solid rgba(14, 165, 233, 0.3);
         border-radius: 18px;
         padding: 2.2rem;
         background:
-          radial-gradient(28rem 16rem at 12% 0%, rgba(129, 140, 248, 0.13), transparent 70%),
+          radial-gradient(28rem 16rem at 12% 0%, rgba(14, 165, 233, 0.13), transparent 70%),
           var(--bg-soft);
         display: grid;
         grid-template-columns: 1.25fr 1fr;
@@ -630,7 +704,7 @@
         border: 1px solid var(--line);
         border-radius: 13px;
         padding: 1.5rem;
-        background: rgba(255, 255, 255, 0.022);
+        background: var(--panel-2);
         text-align: center;
       }
 
@@ -679,7 +753,7 @@
         border: 1px solid var(--line-soft);
         border-radius: 16px;
         padding: 1.8rem 1.6rem;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01));
+        background: var(--lift);
         display: flex;
         flex-direction: column;
         transition:
@@ -689,13 +763,13 @@
 
       .tier:hover {
         transform: translateY(-3px);
-        border-color: rgba(129, 140, 248, 0.4);
+        border-color: rgba(14, 165, 233, 0.4);
       }
 
       .tier.featured {
-        border-color: rgba(129, 140, 248, 0.45);
+        border-color: rgba(14, 165, 233, 0.45);
         background:
-          radial-gradient(22rem 12rem at 50% 0%, rgba(129, 140, 248, 0.14), transparent 70%),
+          radial-gradient(22rem 12rem at 50% 0%, rgba(14, 165, 233, 0.14), transparent 70%),
           var(--bg-soft);
       }
 
@@ -746,7 +820,7 @@
         border-radius: 22px;
         padding: 4rem 2rem;
         background:
-          radial-gradient(30rem 18rem at 50% 0%, rgba(129, 140, 248, 0.15), transparent 70%),
+          radial-gradient(30rem 18rem at 50% 0%, rgba(14, 165, 233, 0.15), transparent 70%),
           var(--bg-soft);
       }
 
@@ -772,6 +846,42 @@
         padding: 0 1rem;
       }
 
+      /* A pale blue mat under the screenshot with a soft shadow, so the dark
+         app window reads as something being shown rather than a rectangle cut
+         out of the page. */
+      .hero-shot .shot {
+        border-radius: 14px;
+        padding: 0;
+        background: linear-gradient(180deg, #eaf4ff, #dcecfd);
+        box-shadow:
+          0 0 0 1px rgba(12, 40, 74, 0.08),
+          0 2px 8px rgba(12, 40, 74, 0.06),
+          0 30px 70px -28px rgba(12, 40, 74, 0.4);
+      }
+
+      /* A pool of colour under the screenshot, so it sits in the page rather
+         than on top of it. Behind the image (z-index -1) and blurred well past
+         its own edges, which is what keeps it reading as spill rather than as a
+         second rectangle. */
+      .hero-shot::before {
+        content: '';
+        position: absolute;
+        left: 8%;
+        right: 8%;
+        top: 12%;
+        bottom: -6%;
+        z-index: -1;
+        border-radius: 50%;
+        background: radial-gradient(
+          closest-side,
+          rgba(14, 165, 233, 0.3),
+          rgba(37, 99, 235, 0.16) 55%,
+          transparent
+        );
+        filter: blur(60px);
+        pointer-events: none;
+      }
+
       /* A pool of light under the panel, so it reads as floating over the page
          rather than pasted onto it. */
       .hero-shot::before {
@@ -782,7 +892,7 @@
         width: 78%;
         height: 70%;
         transform: translateX(-50%);
-        background: radial-gradient(closest-side, rgba(124, 108, 255, 0.34), transparent 72%);
+        background: radial-gradient(closest-side, rgba(14, 165, 233, 0.34), transparent 72%);
         filter: blur(48px);
         z-index: -1;
       }
@@ -795,7 +905,7 @@
       }
 
       .beat {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+        background: var(--lift);
         border: 1px solid var(--line);
         border-radius: 18px;
         padding: 1.7rem 1.7rem 0;
@@ -882,7 +992,7 @@
         place-items: center;
         padding: 1.1rem;
         background:
-          radial-gradient(120% 90% at 50% 0%, rgba(124, 108, 255, 0.14), transparent 60%),
+          radial-gradient(120% 90% at 50% 0%, rgba(14, 165, 233, 0.14), transparent 60%),
           linear-gradient(180deg, #151521, #0d0d16);
       }
 
@@ -981,8 +1091,8 @@
       /* Whoever is speaking is ringed, the way a call does it. This is the only
          cue that says which line of the transcript belongs to whom. */
       .tile.speaking {
-        border-color: rgba(124, 108, 255, 0.75);
-        box-shadow: 0 0 0 3px rgba(124, 108, 255, 0.16);
+        border-color: rgba(14, 165, 233, 0.75);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.16);
       }
 
       /* Fills the tile the way a camera feed would, rather than sitting in the
@@ -1078,7 +1188,7 @@
         opacity: 0;
         transition: opacity 0.35s ease, transform 0.35s ease;
         border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
+        border: 1px solid var(--line);
         background: rgba(12, 12, 18, 0.93);
         backdrop-filter: blur(10px);
         box-shadow: 0 22px 50px rgba(0, 0, 0, 0.6);
@@ -1096,7 +1206,7 @@
         color: var(--dim);
         padding-bottom: 0.5rem;
         margin-bottom: 0.6rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+        border-bottom: 1px solid var(--line-soft);
       }
 
       .demo-a {
@@ -1162,7 +1272,7 @@
       }
 
       .opt {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+        background: var(--lift);
         border: 1px solid var(--line);
         border-radius: 18px;
         padding: 1.7rem;
@@ -1203,7 +1313,7 @@
         padding: 0.36rem 0.7rem;
         border-radius: 7px;
         border: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.035);
+        background: var(--panel-2);
         color: var(--muted);
       }
 
@@ -1218,12 +1328,12 @@
         border: 1px solid var(--line);
         border-radius: 11px;
         padding: 0.85rem 0.95rem;
-        background: rgba(255, 255, 255, 0.03);
+        background: var(--panel-2);
       }
 
       .pick.on {
-        border-color: rgba(124, 108, 255, 0.55);
-        background: rgba(124, 108, 255, 0.09);
+        border-color: rgba(14, 165, 233, 0.55);
+        background: rgba(14, 165, 233, 0.09);
       }
 
       .pick b {
@@ -1292,23 +1402,20 @@
 
     <header>
       <div class="wrap nav">
-        <a class="brand" href="#top">
-          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-            <defs>
-              <linearGradient id="m" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#818CF8" />
-                <stop offset="100%" stop-color="#C084FC" />
-              </linearGradient>
-            </defs>
-            <g fill="url(#m)">
-              <rect x="4.2" y="8.4" width="2.1" height="7.2" rx="1.05" />
-              <rect x="7.6" y="5.8" width="2.1" height="12.5" rx="1.05" />
-              <rect x="11" y="3.4" width="2.1" height="17.3" rx="1.05" />
-              <rect x="14.4" y="5.8" width="2.1" height="12.5" rx="1.05" />
-              <rect x="17.8" y="8.4" width="2.1" height="7.2" rx="1.05" />
-            </g>
-          </svg>
-          <span>SAGE</span>
+        <!-- The same waveform the app animates in its own title bar. See
+             mark.css: one --i per bar and letter drives both the hue and the
+             delay, so the colour travels left to right in step with the wave. -->
+        <a class="brand" href="#top" aria-label="SAGE">
+          <span class="sage-mark">
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+              <rect class="sage-bar" style="--i: 0" x="4.2" y="8.4" width="2.1" height="7.2" rx="1.05" />
+              <rect class="sage-bar" style="--i: 1" x="7.6" y="5.8" width="2.1" height="12.5" rx="1.05" />
+              <rect class="sage-bar" style="--i: 2" x="11" y="3.4" width="2.1" height="17.3" rx="1.05" />
+              <rect class="sage-bar" style="--i: 3" x="14.4" y="5.8" width="2.1" height="12.5" rx="1.05" />
+              <rect class="sage-bar" style="--i: 4" x="17.8" y="8.4" width="2.1" height="7.2" rx="1.05" />
+            </svg>
+            <span class="sage-word" aria-hidden="true"><i style="--i: 5">S</i><i style="--i: 6">A</i><i style="--i: 7">G</i><i style="--i: 8">E</i></span>
+          </span>
         </a>
         <nav class="nav-links">
           <a href="#how">How it works</a>
@@ -1320,8 +1427,13 @@
         <div class="nav-actions">
           <!-- Sign in rather than Log in, because for most people arriving
                here it is also the sign-up: there is no password to create, so
-               the two are the same act. -->
-          <a class="nav-signin" href="/account.html">Sign in</a>
+               the two are the same act.
+
+               Swapped for the account's own address once the script below
+               finds a session. Starts as "Sign in" rather than blank because
+               that is the honest answer until the server has been asked, and a
+               header that pops in late looks broken either way round. -->
+          <a class="nav-signin" id="nav-account" href="/account.html">Sign in</a>
           <a
             class="btn btn-primary"
             style="padding: 0.55rem 1rem; font-size: 0.86rem"
@@ -2099,6 +2211,14 @@
       // Reveal sections as they scroll into view. The hiding rules are scoped to
       // .js on <html>, added before first paint, so a script failure or a
       // no-JS browser shows the full page rather than a blank one.
+      //
+      // threshold 0, not a fraction. "12% of it visible" is a condition a tall
+      // section can never satisfy - 12% of a block several screens high is more
+      // than a screen - so those sections stayed at opacity 0 and the page was
+      // blank. Landing on /#pricing from the nav did exactly that: you arrive
+      // at the top of the section, a sliver is showing, and it never fired.
+      // The demo observer further down already carries this same fix and the
+      // same note; this one was missed.
       const io = new IntersectionObserver(
         (entries) => {
           for (const e of entries) {
@@ -2108,9 +2228,21 @@
             }
           }
         },
-        { threshold: 0.12 }
+        // A little before it enters view, so the fade is finishing rather than
+        // starting by the time it is actually being read.
+        { threshold: 0, rootMargin: '0px 0px -8% 0px' }
       );
       document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+      // Belt and braces: anything still hidden a second after load is shown.
+      // A section nobody can read is a worse failure than one that appears
+      // without its animation, and this costs nothing when the observer works.
+      setTimeout(() => {
+        document.querySelectorAll('.reveal:not(.in)').forEach((el) => {
+          const box = el.getBoundingClientRect();
+          if (box.top < innerHeight && box.bottom > 0) el.classList.add('in');
+        });
+      }, 1000);
     </script>
       <script>
       // Buying goes through Stripe Checkout. The price is decided by the
@@ -2172,8 +2304,9 @@
         position: relative;
         width: 100%;
         max-width: 430px;
-        background: #10101a;
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow-md);
         border-radius: 14px;
         padding: 1.7rem 1.7rem 1.5rem;
         animation: sheet-in 0.16s ease-out;
@@ -2183,10 +2316,10 @@
         to { opacity: 1; transform: none; }
       }
       #sheet-card h3 { font-size: 1.1rem; margin: 0 0 0.7rem; letter-spacing: -0.01em; }
-      #sheet-body { font-size: 0.9rem; line-height: 1.6; color: #9a9aa5; }
+      #sheet-body { font-size: 0.9rem; line-height: 1.6; color: var(--muted); }
       #sheet-body p { margin: 0 0 0.8rem; }
-      #sheet-body b { color: #f2f2f5; font-weight: 600; }
-      #sheet-body a { color: #7c6cff; }
+      #sheet-body b { color: var(--text); font-weight: 600; }
+      #sheet-body a { color: var(--sky-deep); }
       #sheet-body .row { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1.2rem; }
       #sheet-body .row a {
         text-decoration: none;
@@ -2194,10 +2327,10 @@
         font-weight: 600;
         padding: 0.5rem 0.9rem;
         border-radius: 8px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        color: #f2f2f5;
+        border: 1px solid var(--line);
+        color: var(--text);
       }
-      #sheet-body .row a.primary { background: #5b4be8; border-color: #5b4be8; }
+      #sheet-body .row a.primary { background: var(--sky); border-color: var(--sky); color: #fff; }
       #sheet-close {
         position: absolute;
         top: 0.8rem;
@@ -2449,6 +2582,43 @@
           if (document.hidden) stop()
           else if (visible && !running) play()
         })
+      })()
+    </script>
+
+    <script>
+      /**
+       * Say who is signed in, rather than inviting them to sign in again.
+       *
+       * The header is a static file served from a CDN, so it cannot know at
+       * build time whether the person loading it has a session - it has to ask.
+       * Until this answers, the link reads "Sign in", which is the right thing
+       * to show a stranger and a harmless thing to show a member for one
+       * moment.
+       *
+       * A 401 is the ordinary case, not a failure: most visitors are not
+       * signed in. Nothing is logged and nothing changes.
+       */
+      ;(function () {
+        var link = document.getElementById('nav-account')
+        if (!link) return
+
+        fetch('/api/account/me', { headers: { Accept: 'application/json' } })
+          .then(function (res) {
+            return res.ok ? res.json() : null
+          })
+          .then(function (data) {
+            if (!data || !data.email) return
+
+            // The address, not the word "Account": it answers "am I signed in,
+            // and as whom" in one glance, which matters when hours are pooled
+            // against an address and somebody has two.
+            link.textContent = data.email
+            link.classList.add('signed-in')
+            link.title = 'Your balance and receipts'
+          })
+          .catch(function () {
+            /* Offline, or the API is down. The sign-in link still works. */
+          })
       })()
     </script>
   </body>
