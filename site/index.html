@@ -1000,8 +1000,48 @@
         filter: drop-shadow(0 14px 34px rgba(0, 0, 0, 0.6));
       }
 
+      /* It sits still for most of the loop and then peeks — a wobble every few
+         seconds reads as a character deciding not to look, where a constant
+         bob would just be a moving thing on the page. */
+      .no-see {
+        display: block;
+        font-size: 3.2rem;
+        line-height: 1;
+        margin-bottom: 0.85rem;
+        animation: peek 6s ease-in-out infinite;
+        filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+      }
+
+      @keyframes peek {
+        0%,
+        60%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        66% {
+          transform: translateY(-5px) rotate(-8deg);
+        }
+        72% {
+          transform: translateY(-2px) rotate(6deg);
+        }
+        78% {
+          transform: translateY(-5px) rotate(-5deg);
+        }
+        84% {
+          transform: translateY(0) rotate(0deg);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .no-see {
+          animation: none;
+        }
+      }
+
       .screen-empty {
-        color: #4b4a5e;
+        /* Lifted from #4b4a5e: this text sits on the dark mock, and at that
+           value it was barely legible against it. */
+        color: #8b8aa0;
         font-size: 0.86rem;
         text-align: center;
         line-height: 1.6;
@@ -1735,6 +1775,10 @@
             </div>
             <div class="screen-body">
               <p class="screen-empty">
+                <!-- One emoji, in the one place on the page where it is the
+                     literal subject rather than decoration: this is the frame
+                     the other side receives, and there is nothing in it. -->
+                <span class="no-see" role="img" aria-label="See-no-evil monkey">🙈</span>
                 Nothing.<br />
                 The window is not in the captured frame.
               </p>
