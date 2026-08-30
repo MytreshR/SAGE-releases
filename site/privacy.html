@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Privacy — SAGE</title>
+    <meta
+      name="description"
+      content="What SAGE collects, what it does not, and who else sees it. SAGE does not store your audio, transcripts or answers."
+    />
+    <meta name="theme-color" content="#07070c" />
+    <link rel="canonical" href="https://www.sagemeeting-ai.xyz/privacy.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%235B4BE8'/%3E%3Cg fill='white'%3E%3Crect x='4.2' y='8.4' width='2.1' height='7.2' rx='1.05'/%3E%3Crect x='7.6' y='5.8' width='2.1' height='12.5' rx='1.05'/%3E%3Crect x='11' y='3.4' width='2.1' height='17.3' rx='1.05'/%3E%3Crect x='14.4' y='5.8' width='2.1' height='12.5' rx='1.05'/%3E%3Crect x='17.8' y='8.4' width='2.1' height='7.2' rx='1.05'/%3E%3C/g%3E%3C/svg%3E"
+    />
+    <style>
+      :root {
+        --bg: #07070c;
+        --panel: rgba(255, 255, 255, 0.028);
+        --line: rgba(255, 255, 255, 0.09);
+        --line-soft: rgba(255, 255, 255, 0.055);
+        --text: #edecf5;
+        --muted: #9b99ad;
+        --dim: #6e6c80;
+        --indigo: #818cf8;
+        --good: #4ade80;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        background: radial-gradient(
+          55rem 34rem at 20% -12%,
+          rgba(99, 102, 241, 0.13),
+          transparent 60%
+        );
+      }
+      .wrap {
+        position: relative;
+        z-index: 1;
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 0 1.5rem 6rem;
+      }
+      header {
+        padding: 1.6rem 0 3rem;
+      }
+      .mark {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        font-size: 0.82rem;
+        color: var(--dim);
+        text-decoration: none;
+      }
+      .mark:hover {
+        color: var(--text);
+      }
+      h1 {
+        font-size: 2rem;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.6rem;
+      }
+      .lede {
+        color: var(--muted);
+        font-size: 1.02rem;
+      }
+      .updated {
+        color: var(--dim);
+        font-size: 0.83rem;
+        margin-top: 1.2rem;
+      }
+      h2 {
+        font-size: 1.12rem;
+        letter-spacing: -0.015em;
+        margin: 2.6rem 0 0.8rem;
+        padding-top: 1.6rem;
+        border-top: 1px solid var(--line-soft);
+      }
+      h3 {
+        font-size: 0.95rem;
+        margin: 1.5rem 0 0.4rem;
+        color: var(--text);
+      }
+      p {
+        color: var(--muted);
+        margin-bottom: 0.9rem;
+      }
+      ul {
+        color: var(--muted);
+        margin: 0 0 1rem 1.15rem;
+      }
+      li {
+        margin-bottom: 0.5rem;
+      }
+      strong {
+        color: var(--text);
+        font-weight: 600;
+      }
+      a {
+        color: var(--indigo);
+      }
+      .callout {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 1.3rem 1.5rem;
+        margin: 1.6rem 0;
+      }
+      .callout p:last-child {
+        margin-bottom: 0;
+      }
+      .callout.strong {
+        border-color: rgba(74, 222, 128, 0.25);
+        background: rgba(74, 222, 128, 0.05);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0 1.4rem;
+        font-size: 0.9rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.7rem 0.9rem 0.7rem 0;
+        border-bottom: 1px solid var(--line-soft);
+        vertical-align: top;
+        color: var(--muted);
+      }
+      th {
+        color: var(--dim);
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      td:first-child {
+        color: var(--text);
+        font-weight: 500;
+        white-space: nowrap;
+        padding-right: 1.4rem;
+      }
+      footer {
+        margin-top: 3.5rem;
+        padding-top: 1.6rem;
+        border-top: 1px solid var(--line-soft);
+        color: var(--dim);
+        font-size: 0.85rem;
+      }
+      @media (max-width: 560px) {
+        h1 {
+          font-size: 1.6rem;
+        }
+        td:first-child {
+          white-space: normal;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <a class="mark" href="/">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+            <rect width="24" height="24" rx="6" fill="#5B4BE8" />
+            <g fill="#fff">
+              <rect x="4.2" y="8.4" width="2.1" height="7.2" rx="1.05" />
+              <rect x="7.6" y="5.8" width="2.1" height="12.5" rx="1.05" />
+              <rect x="11" y="3.4" width="2.1" height="17.3" rx="1.05" />
+              <rect x="14.4" y="5.8" width="2.1" height="12.5" rx="1.05" />
+              <rect x="17.8" y="8.4" width="2.1" height="7.2" rx="1.05" />
+            </g>
+          </svg>
+          SAGE
+        </a>
+      </header>
+
+      <main>
+        <h1>Privacy</h1>
+        <p class="lede">
+          SAGE listens to conversations, so the first thing worth saying is what happens to what it
+          hears.
+        </p>
+        <p class="updated">Last updated 30 August 2026</p>
+
+        <div class="callout strong">
+          <p>
+            <strong>SAGE does not store your audio, your transcripts, or the answers it gives
+            you.</strong> Audio is transcribed and answered as it happens and is not written to any
+            server we run. The only record of a session that survives it is a count of minutes
+            used, kept so your balance is right.
+          </p>
+        </div>
+
+        <p>
+          This page describes what SAGE collects, why, and who else is involved. It covers the SAGE
+          desktop application and this website. SAGE is run by Mytresh Ravi; questions go to
+          <a href="mailto:mytresh1984@outlook.com">mytresh1984@outlook.com</a>.
+        </p>
+
+        <h2>What is collected</h2>
+
+        <h3>If you only use the free trial</h3>
+        <p>
+          Nothing that identifies you. The trial is limited to one per computer, and that is
+          enforced with an <strong>identifier derived from your hardware and then hashed</strong> —
+          a fixed-length string that cannot be turned back into a serial number, and which is not
+          linked to a name or an address, because at that point we do not have one.
+        </p>
+        <p>Against that identifier we keep how many minutes of listening time have been used.</p>
+
+        <h3>If you create an account</h3>
+        <table>
+          <tr>
+            <th>What</th>
+            <th>Why</th>
+          </tr>
+          <tr>
+            <td>Email address</td>
+            <td>
+              It is how an account is found and how your hours follow you between computers. Sign-in
+              codes and receipts are sent to it.
+            </td>
+          </tr>
+          <tr>
+            <td>Hours bought and used</td>
+            <td>So the balance shown to you is correct.</td>
+          </tr>
+          <tr>
+            <td>Purchase history</td>
+            <td>Date, amount and hours for each top-up, shown to you as receipts.</td>
+          </tr>
+          <tr>
+            <td>The computer signed in</td>
+            <td>
+              The hashed device identifier above, so hours can only be spent on one machine at a
+              time.
+            </td>
+          </tr>
+        </table>
+        <p>
+          Accounts are stored under a <strong>hash of the email address rather than the address
+          itself</strong>, so the store holds no readable list of who uses SAGE. The address is kept
+          inside the record so support can answer you, but you have to know an address to find its
+          record.
+        </p>
+
+        <h3>If you sign in with Google</h3>
+        <p>
+          SAGE asks Google for two things only: confirmation of who you are, and your email address.
+          It does not request, receive or store access to your Gmail, Drive, contacts, calendar or
+          anything else. Google is told you signed in to SAGE.
+        </p>
+
+        <h3>If you buy hours</h3>
+        <p>
+          Payment is handled entirely by <strong>Stripe</strong>, which is the merchant of record.
+          Card details are entered on Stripe's own page and never reach us — we receive only the
+          amount, the currency, the date and the email address on the receipt.
+        </p>
+
+        <h2>What is not collected</h2>
+        <ul>
+          <li><strong>Audio.</strong> It is streamed for transcription and never written to disk on our side.</li>
+          <li><strong>Transcripts and answers.</strong> The server that generates an answer keeps a count of tokens used and nothing of what they said.</li>
+          <li>
+            <strong>Your resume or notes.</strong> What you paste into SAGE to ground its answers
+            stays on your computer and is sent only as part of the request that answers a question.
+          </li>
+          <li><strong>Your session history.</strong> Past questions and answers are stored on your own machine, encrypted, and are never uploaded.</li>
+          <li><strong>Card numbers.</strong> See above — Stripe holds those, not us.</li>
+          <li><strong>Advertising or tracking identifiers.</strong> There are none, on the site or in the app.</li>
+        </ul>
+
+        <h2>Who else is involved</h2>
+        <p>Running SAGE means using a small number of other companies. Each sees only what it needs:</p>
+        <table>
+          <tr>
+            <th>Who</th>
+            <th>What they see</th>
+          </tr>
+          <tr>
+            <td>OpenAI</td>
+            <td>
+              Audio and text, in order to transcribe and answer it. Sent under our account, through
+              their API.
+            </td>
+          </tr>
+          <tr>
+            <td>Stripe</td>
+            <td>Everything about a payment, including card details we never receive.</td>
+          </tr>
+          <tr>
+            <td>Resend</td>
+            <td>Your email address and the sign-in codes and receipts sent to it.</td>
+          </tr>
+          <tr>
+            <td>Upstash</td>
+            <td>The stored records described above — balances, receipts, hashed identifiers.</td>
+          </tr>
+          <tr>
+            <td>Vercel</td>
+            <td>Hosts the site and the API, and keeps ordinary server logs.</td>
+          </tr>
+          <tr>
+            <td>Google</td>
+            <td>Only if you choose to sign in with Google, and only your identity and address.</td>
+          </tr>
+        </table>
+        <p>Nothing is sold, rented, or shared with anyone for advertising.</p>
+
+        <h2>Cookies</h2>
+        <p>
+          This site sets one cookie, and only after you sign in: it holds your session so the
+          account page knows who you are. It cannot be read by scripts on the page, and it is
+          cleared when you sign out. A second, short-lived cookie exists for ten minutes during a
+          Google sign-in, to check that the sign-in started here.
+        </p>
+        <p>There are no analytics, advertising or third-party cookies.</p>
+
+        <h2>How long things are kept</h2>
+        <ul>
+          <li><strong>Sign-in codes</strong> — ten minutes, and they are stored hashed rather than in the clear.</li>
+          <li><strong>Trial records</strong> — kept, because a trial that is forgotten is a trial that can be taken twice.</li>
+          <li><strong>Account records and receipts</strong> — for as long as the account exists, and afterwards only as long as tax and accounting rules require the sale to be recorded.</li>
+          <li><strong>Server logs</strong> — kept by Vercel for a short period, and contain no conversation content.</li>
+        </ul>
+
+        <h2>Your choices</h2>
+        <p>
+          <strong>Sign out everywhere.</strong> The account page ends every session at once, on this
+          browser and on any computer signed in.
+        </p>
+        <p>
+          <strong>See what is held.</strong> Your balance and every receipt are on the account page.
+          For anything else, or for a copy of your record, email us.
+        </p>
+        <p>
+          <strong>Deletion.</strong> Email
+          <a href="mailto:mytresh1984@outlook.com?subject=SAGE%20-%20delete%20my%20account">mytresh1984@outlook.com</a>
+          from the address on the account and we will delete it. Records of a completed sale are
+          kept where the law requires, and any unused hours are forfeited on deletion — say so
+          plainly in your message if that is not what you intended.
+        </p>
+        <p>
+          Depending on where you live you may have further rights over your data, including access,
+          correction, and objecting to how it is used. The address above reaches a person; there is
+          no separate process to go through.
+        </p>
+
+        <h2>Children</h2>
+        <p>SAGE is not intended for anyone under 16, and accounts are not knowingly created for them.</p>
+
+        <h2>Changes</h2>
+        <p>
+          If this page changes in a way that affects what is collected or who sees it, the date at
+          the top changes and account holders are told by email. Wording fixes are not announced.
+        </p>
+
+        <h2>Contact</h2>
+        <p>
+          <a href="mailto:mytresh1984@outlook.com">mytresh1984@outlook.com</a>
+        </p>
+
+        <footer>
+          <a href="/">Back to SAGE</a>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>
