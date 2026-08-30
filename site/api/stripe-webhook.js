@@ -1,3 +1,4 @@
+import { credit, debit } from './_lib/accounts.js'
 import { mintKey } from './_lib/keys.js'
 import { get, incr, set } from './_lib/store.js'
 import { json } from './_lib/trial.js'
@@ -53,6 +54,15 @@ export default async function handler(req, res) {
       return json(res, 200, { unmatched: true })
     }
 
+    // A top-up has no serial to revoke - the hours went straight onto a
+    // balance and there is no key in circulation. Taking them back off the
+    // account is the same clawback reaching the same money by another route.
+    if (order.accountEmail) {
+      await debit(order.accountEmail, { sessionId: order.sessionId, reason: event.type })
+      console.log(`[stripe] ${event.type} - took ${order.hours}h back off ${order.accountEmail}`)
+      return json(res, 200, { debited: true })
+    }
+
     await revokeSerial(order.serial, event.type)
     return json(res, 200, { revoked: order.serial })
   }
@@ -72,7 +82,12 @@ export default async function handler(req, res) {
   // without one. Minting per delivery would hand out two keys for one payment.
   const existing = await get(keyFor(sessionId))
   if (existing) {
-    console.log(`[stripe] ${sessionId} already fulfilled as key #${existing.serial}`)
+    console.log(
+      `[stripe] ${sessionId} already fulfilled` +
+        (existing.accountEmail
+          ? ` as ${existing.hours}h on ${existing.accountEmail}`
+          : ` as key #${existing.serial}`)
+    )
     return json(res, 200, { alreadyFulfilled: true })
   }
 
@@ -92,6 +107,66 @@ export default async function handler(req, res) {
     return json(res, 200, { error: 'unknown-pack' })
   }
 
+  // A sandbox purchase grants nothing real - hours or key.
+  //
+  // Stripe's test card numbers are public, so while the deployment is in test
+  // mode anyone who finds the Buy button can complete a purchase for free.
+  // Decided before either path below, because the reasoning does not change
+  // when the hours land on an account instead of in a key: free hours are the
+  // thing being protected, and the key was only ever how they were carried.
+  //
+  // SAGE_ALLOW_TEST_KEYS=1 turns real granting back on, for when the whole
+  // chain needs testing end to end again.
+  const placeholder = event.livemode !== true && process.env.SAGE_ALLOW_TEST_KEYS !== '1'
+
+  // Bought while signed in.
+  //
+  // The hours go onto the balance and nothing is minted at all. That is the
+  // whole point of buying from an account: there is no key to lose, to paste
+  // into a forum, or to be told is already in use on another computer. The
+  // address is the one written into the session by /api/account/checkout from
+  // a verified cookie - never customer_details, which is whatever was typed
+  // into Stripe's form.
+  const accountEmail = session.metadata?.accountEmail
+  if (accountEmail) {
+    if (!placeholder) {
+      // Idempotent on the session id, because Stripe retries. See credit().
+      await credit(accountEmail, {
+        hours: pack.hours,
+        sessionId,
+        amount: session.amount_total,
+        currency: session.currency
+      })
+    }
+
+    const topUp = {
+      accountEmail,
+      serial: null,
+      key: null,
+      placeholder,
+      hours: pack.hours,
+      amount: session.amount_total,
+      currency: session.currency,
+      email: session.customer_details?.email ?? accountEmail,
+      sessionId,
+      paymentIntent: session.payment_intent ?? null,
+      livemode: event.livemode === true,
+      paidAt: new Date().toISOString()
+    }
+
+    await set(keyFor(sessionId), topUp)
+    // Filed by payment intent as well, because that is the only identifier a
+    // refund or a dispute carries - neither mentions the checkout session.
+    if (session.payment_intent) await set(`sage:pi:${session.payment_intent}`, topUp)
+
+    console.log(
+      placeholder
+        ? `[stripe] ${sessionId} -> placeholder, no hours added (test purchase, ${pack.hours}h)`
+        : `[stripe] ${sessionId} -> ${pack.hours}h added to ${accountEmail}`
+    )
+    return json(res, 200, { credited: !placeholder })
+  }
+
   if (!process.env.SAGE_KEY_SECRET) {
     // 500 on purpose, so Stripe retries: the payment is real and the customer
     // is owed a key. Swallowing this would lose the sale silently.
@@ -99,18 +174,10 @@ export default async function handler(req, res) {
     return json(res, 500, { error: 'server-misconfigured' })
   }
 
-  // A sandbox purchase mints nothing real.
-  //
-  // Stripe's test card numbers are public, so while the deployment is in test
-  // mode anyone who finds the Buy button can complete a purchase for free. A
-  // placeholder is handed back instead of a key: nothing to activate, nothing
-  // to leak, and no serial burned - the counter is not touched either, so the
+  // The anonymous path, unchanged: a key for one machine.
+  // A placeholder is handed back instead: nothing to activate, nothing to
+  // leak, and no serial burned - the counter is not touched either, so the
   // numbering stays clean for real sales.
-  //
-  // SAGE_ALLOW_TEST_KEYS=1 turns real minting back on, for when the whole
-  // chain needs testing end to end again.
-  const placeholder = event.livemode !== true && process.env.SAGE_ALLOW_TEST_KEYS !== '1'
-
   let serial = null
   let key = 'SAGE-XXXX-XXXX-XXXX-XXXX'
 

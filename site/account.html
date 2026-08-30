@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Your SAGE account</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#07070c" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%235B4BE8'/%3E%3Cg fill='white'%3E%3Crect x='4.2' y='8.4' width='2.1' height='7.2' rx='1.05'/%3E%3Crect x='7.6' y='5.8' width='2.1' height='12.5' rx='1.05'/%3E%3Crect x='11' y='3.4' width='2.1' height='17.3' rx='1.05'/%3E%3Crect x='14.4' y='5.8' width='2.1' height='12.5' rx='1.05'/%3E%3Crect x='17.8' y='8.4' width='2.1' height='7.2' rx='1.05'/%3E%3C/g%3E%3C/svg%3E"
+    />
+    <style>
+      :root {
+        --bg: #07070c;
+        --panel: #10101a;
+        --panel-soft: rgba(255, 255, 255, 0.028);
+        --line: rgba(255, 255, 255, 0.09);
+        --line-soft: rgba(255, 255, 255, 0.055);
+        --text: #edecf5;
+        --muted: #9b99ad;
+        --dim: #6e6c80;
+        --indigo: #818cf8;
+        --violet: #c084fc;
+        --good: #4ade80;
+        --bad: #fca5a5;
+        --warn: #fbbf24;
+        --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        background:
+          radial-gradient(56rem 36rem at 15% -14%, rgba(99, 102, 241, 0.15), transparent 60%),
+          radial-gradient(44rem 30rem at 88% 2%, rgba(168, 85, 247, 0.1), transparent 60%);
+      }
+      .wrap {
+        position: relative;
+        z-index: 1;
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 0 1.5rem 5rem;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1.6rem 0 2.4rem;
+      }
+      .mark {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        font-size: 0.82rem;
+        color: var(--dim);
+        text-decoration: none;
+      }
+      .who {
+        font-size: 0.85rem;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        min-width: 0;
+      }
+      .who span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+        letter-spacing: -0.025em;
+        margin-bottom: 0.4rem;
+      }
+      h2 {
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+        color: var(--dim);
+        margin-bottom: 1rem;
+      }
+      .lede {
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      section {
+        margin-top: 2.6rem;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 1.7rem;
+      }
+
+      /* ---- balance ---- */
+      .balance {
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+      }
+      .big {
+        font-size: 3rem;
+        font-weight: 700;
+        letter-spacing: -0.035em;
+        line-height: 1.05;
+        background: linear-gradient(135deg, #818cf8, #c084fc);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .big.empty {
+        background: none;
+        color: var(--dim);
+      }
+      .unit {
+        font-size: 1rem;
+        color: var(--muted);
+        font-weight: 500;
+      }
+      .meter {
+        height: 6px;
+        border-radius: 99px;
+        background: rgba(255, 255, 255, 0.07);
+        overflow: hidden;
+        margin: 1.3rem 0 0.8rem;
+      }
+      .meter > div {
+        height: 100%;
+        border-radius: 99px;
+        background: linear-gradient(90deg, #818cf8, #c084fc);
+        transition: width 0.4s ease;
+      }
+      .meter.low > div {
+        background: var(--warn);
+      }
+      .spent {
+        font-size: 0.83rem;
+        color: var(--dim);
+      }
+
+      /* ---- top-up ---- */
+      .packs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 0.9rem;
+      }
+      .pack {
+        text-align: left;
+        background: var(--panel-soft);
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        padding: 1.15rem 1.25rem;
+        cursor: pointer;
+        color: var(--text);
+        font: inherit;
+        transition:
+          border-color 0.15s ease,
+          background 0.15s ease;
+      }
+      .pack:hover:not(:disabled) {
+        border-color: rgba(129, 140, 248, 0.5);
+        background: rgba(129, 140, 248, 0.07);
+      }
+      .pack:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      .pack .hrs {
+        font-size: 1.2rem;
+        font-weight: 700;
+        letter-spacing: -0.015em;
+      }
+      .pack .price {
+        color: var(--indigo);
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+      .pack .per {
+        color: var(--dim);
+        font-size: 0.78rem;
+        margin-top: 0.3rem;
+      }
+
+      /* ---- receipts ---- */
+      .txns {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+      .txn {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.95rem 1.2rem;
+        border-bottom: 1px solid var(--line-soft);
+        font-size: 0.9rem;
+      }
+      .txn:last-child {
+        border-bottom: none;
+      }
+      .txn .when {
+        color: var(--dim);
+        font-size: 0.8rem;
+      }
+      .txn .amt {
+        font-family: var(--mono);
+        font-size: 0.88rem;
+        white-space: nowrap;
+      }
+      .txn.credit .hrs {
+        color: var(--good);
+      }
+      .txn.debit .hrs {
+        color: var(--bad);
+      }
+      .txn .hrs {
+        font-weight: 600;
+      }
+      .tag {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--warn);
+        border: 1px solid rgba(251, 191, 36, 0.35);
+        border-radius: 5px;
+        padding: 0.05rem 0.35rem;
+        margin-left: 0.5rem;
+        vertical-align: 1px;
+      }
+
+      /* ---- settings ---- */
+      .setting {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.2rem;
+        padding: 1.05rem 0;
+        border-bottom: 1px solid var(--line-soft);
+        flex-wrap: wrap;
+      }
+      .setting:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+      .setting:first-child {
+        padding-top: 0;
+      }
+      .setting .what {
+        font-size: 0.92rem;
+        font-weight: 600;
+      }
+      .setting .why {
+        color: var(--dim);
+        font-size: 0.82rem;
+        max-width: 42ch;
+      }
+      .value {
+        font-family: var(--mono);
+        font-size: 0.86rem;
+        color: var(--muted);
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      button,
+      .btn {
+        font: inherit;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+        border-radius: 9px;
+        padding: 0.5rem 0.9rem;
+        cursor: pointer;
+        white-space: nowrap;
+        text-decoration: none;
+        display: inline-block;
+      }
+      button:hover:not(:disabled),
+      .btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      button:disabled {
+        opacity: 0.55;
+        cursor: default;
+      }
+      button.danger {
+        color: var(--bad);
+        border-color: rgba(252, 165, 165, 0.28);
+      }
+      button.danger:hover:not(:disabled) {
+        background: rgba(252, 165, 165, 0.09);
+      }
+      button.primary {
+        background: var(--indigo);
+        border-color: transparent;
+        color: #0b0a14;
+      }
+      button.primary:hover:not(:disabled) {
+        filter: brightness(1.08);
+      }
+      a {
+        color: var(--indigo);
+      }
+      a:focus-visible,
+      button:focus-visible {
+        outline: 2px solid var(--indigo);
+        outline-offset: 3px;
+        border-radius: 8px;
+      }
+
+      .msg {
+        font-size: 0.87rem;
+        border-radius: 10px;
+        padding: 0.8rem 1rem;
+        margin-bottom: 1.4rem;
+        border: 1px solid;
+      }
+      .msg.good {
+        color: var(--good);
+        border-color: rgba(74, 222, 128, 0.28);
+        background: rgba(74, 222, 128, 0.07);
+      }
+      .msg.bad {
+        color: var(--bad);
+        border-color: rgba(252, 165, 165, 0.28);
+        background: rgba(252, 165, 165, 0.07);
+      }
+      .msg.info {
+        color: var(--muted);
+        border-color: var(--line);
+        background: var(--panel-soft);
+      }
+
+      .empty-note {
+        color: var(--dim);
+        font-size: 0.88rem;
+        padding: 1.3rem 1.2rem;
+        text-align: center;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      @media (max-width: 520px) {
+        .big {
+          font-size: 2.4rem;
+        }
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.6rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <a class="mark" href="/">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+            <rect width="24" height="24" rx="6" fill="#5B4BE8" />
+            <g fill="#fff">
+              <rect x="4.2" y="8.4" width="2.1" height="7.2" rx="1.05" />
+              <rect x="7.6" y="5.8" width="2.1" height="12.5" rx="1.05" />
+              <rect x="11" y="3.4" width="2.1" height="17.3" rx="1.05" />
+              <rect x="14.4" y="5.8" width="2.1" height="12.5" rx="1.05" />
+              <rect x="17.8" y="8.4" width="2.1" height="7.2" rx="1.05" />
+            </g>
+          </svg>
+          SAGE
+        </a>
+        <div class="who" id="who" hidden>
+          <span id="who-email"></span>
+          <button id="signout">Sign out</button>
+        </div>
+      </header>
+
+      <main id="main">
+        <p class="lede" id="loading">Loading your account…</p>
+      </main>
+    </div>
+
+    <template id="tpl">
+      <div id="banner" class="msg" hidden></div>
+
+      <h1>Your balance</h1>
+      <p class="lede">
+        Time is only counted while SAGE is listening — a session sitting open costs nothing.
+      </p>
+
+      <section>
+        <div class="card">
+          <div class="balance">
+            <span class="big" id="left">—</span>
+            <span class="unit" id="left-unit"></span>
+          </div>
+          <div class="meter" id="meter"><div id="meter-fill" style="width: 0%"></div></div>
+          <p class="spent" id="spent"></p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Add time</h2>
+        <div class="packs" id="packs"></div>
+      </section>
+
+      <section>
+        <h2>Transactions</h2>
+        <div class="txns" id="txns"></div>
+      </section>
+
+      <section>
+        <h2>Account</h2>
+        <div class="card">
+          <div class="setting">
+            <div>
+              <div class="what">Email</div>
+              <div class="why">How your hours are found. Sign in with this address anywhere.</div>
+            </div>
+            <div class="value" id="set-email"></div>
+          </div>
+          <div class="setting">
+            <div>
+              <div class="what">Signed-in computer</div>
+              <div class="why" id="device-why"></div>
+            </div>
+            <div class="value" id="set-device"></div>
+          </div>
+          <div class="setting">
+            <div>
+              <div class="what">Sign out everywhere</div>
+              <div class="why">
+                Ends this browser and the signed-in copy of SAGE at once. Use it if a laptop is lost
+                or you signed in somewhere you should not have.
+              </div>
+            </div>
+            <button class="danger" id="signout-all">Sign out everywhere</button>
+          </div>
+          <div class="setting">
+            <div>
+              <div class="what">Member since</div>
+              <div class="why">Hours never expire, however long they sit here.</div>
+            </div>
+            <div class="value" id="set-since"></div>
+          </div>
+        </div>
+      </section>
+    </template>
+
+    <script type="module">
+      const $ = (id) => document.getElementById(id)
+      const main = $('main')
+      const params = new URLSearchParams(location.search)
+
+      // ---------------------------------------------------------------- format
+
+      /**
+       * Time, as a person would say it.
+       *
+       * Minutes are the unit that matters - an interview is measured in them,
+       * and "0.4 hours left" is not something anyone can act on. Hours appear
+       * only once there are enough of them to be worth naming.
+       */
+      function spell(ms) {
+        const totalMinutes = Math.floor(Math.max(0, ms) / 60000)
+        if (totalMinutes < 60) return { value: String(totalMinutes), unit: totalMinutes === 1 ? 'minute left' : 'minutes left' }
+        const hours = Math.floor(totalMinutes / 60)
+        const minutes = totalMinutes % 60
+        return {
+          value: minutes ? `${hours}h ${minutes}m` : `${hours}h`,
+          unit: 'left'
+        }
+      }
+
+      const shortTime = (ms) => {
+        const minutes = Math.round(Math.abs(ms) / 60000)
+        return minutes < 60 ? `${minutes} min` : `${+(minutes / 60).toFixed(1)} h`
+      }
+
+      const money = (amount, currency) =>
+        amount === null || amount === undefined
+          ? ''
+          : new Intl.NumberFormat(undefined, {
+              style: 'currency',
+              currency: (currency || 'usd').toUpperCase()
+            }).format(Math.abs(amount) / 100)
+
+      const day = (at) =>
+        new Date(at).toLocaleDateString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        })
+
+      // ------------------------------------------------------------------ load
+
+      async function load() {
+        const res = await fetch('/api/account/me', { headers: { Accept: 'application/json' } })
+        if (res.status === 401) {
+          // Not signed in, or the session was ended elsewhere. Straight to the
+          // login page rather than an error - being signed out is not a fault.
+          location.replace(`/login.html?next=${encodeURIComponent(location.pathname + location.search)}`)
+          return null
+        }
+        if (!res.ok) throw new Error(`account ${res.status}`)
+        return res.json()
+      }
+
+      function render(data) {
+        main.replaceChildren($('tpl').content.cloneNode(true))
+
+        $('who').hidden = false
+        $('who-email').textContent = data.email
+
+        const { remainingMs, grantedMs, usedMs } = data.balance
+        const { value, unit } = spell(remainingMs)
+        $('left').textContent = value
+        $('left').classList.toggle('empty', remainingMs <= 0)
+        $('left-unit').textContent = remainingMs <= 0 ? '— top up to keep going' : unit
+
+        const share = grantedMs > 0 ? Math.max(0, Math.min(1, remainingMs / grantedMs)) : 0
+        $('meter-fill').style.width = `${share * 100}%`
+        // Under ten minutes is the point at which somebody about to walk into
+        // an interview needs to notice, so the bar stops being decorative.
+        $('meter').classList.toggle('low', remainingMs > 0 && remainingMs < 10 * 60 * 1000)
+        $('spent').textContent = grantedMs
+          ? `${shortTime(usedMs)} used of ${shortTime(grantedMs)} bought`
+          : 'You have not bought any time yet.'
+
+        // ---- top-up buttons, priced by the server ----
+        const packs = $('packs')
+        packs.replaceChildren()
+        for (const pack of data.packs) {
+          const button = document.createElement('button')
+          button.className = 'pack'
+          button.innerHTML =
+            `<div class="hrs">${pack.hours} hours</div>` +
+            `<div class="price">${money(pack.amount, pack.currency)}</div>` +
+            `<div class="per">${money(Math.round(pack.amount / pack.hours), pack.currency)} an hour · never expires</div>`
+          button.addEventListener('click', () => buy(pack.hours, button))
+          packs.append(button)
+        }
+
+        // ---- receipts ----
+        const list = $('txns')
+        list.replaceChildren()
+        if (!data.txns.length) {
+          const note = document.createElement('p')
+          note.className = 'empty-note'
+          note.textContent = 'No transactions yet. Hours you buy will show up here.'
+          list.append(note)
+        }
+        for (const txn of data.txns) {
+          const row = document.createElement('div')
+          const credit = txn.ms >= 0
+          row.className = `txn ${credit ? 'credit' : 'debit'}`
+
+          const what = credit
+            ? txn.source === 'stripe'
+              ? 'Top-up'
+              : 'Hours added'
+            : txn.source === 'charge.refunded'
+              ? 'Refunded'
+              : 'Charge reversed'
+
+          const left = document.createElement('div')
+          left.innerHTML =
+            `<div><span class="hrs">${credit ? '+' : '−'}${Math.abs(txn.hours)} hours</span> · ${what}</div>` +
+            `<div class="when">${day(txn.at)}</div>`
+
+          const right = document.createElement('div')
+          right.className = 'amt'
+          right.textContent = money(txn.amount, txn.currency)
+
+          row.append(left, right)
+          list.append(row)
+        }
+
+        // ---- account settings ----
+        $('set-email').textContent = data.email
+        $('set-device').textContent = data.deviceSignedIn ? 'One signed in' : 'None'
+        $('device-why').textContent = data.deviceSignedIn
+          ? 'Hours can be spent on one computer at a time. Signing in on another moves it there.'
+          : 'Sign in from inside SAGE to spend these hours. One computer at a time.'
+        $('set-since').textContent = day(data.createdAt)
+
+        $('signout').addEventListener('click', () => signOut(false))
+        $('signout-all').addEventListener('click', () => signOut(true))
+      }
+
+      const banner = (text, kind = 'info') => {
+        const element = $('banner')
+        if (!element) return
+        element.textContent = text
+        element.className = `msg ${kind}`
+        element.hidden = false
+      }
+
+      // ------------------------------------------------------------------ buy
+
+      async function buy(hours, button) {
+        const was = button.innerHTML
+        button.disabled = true
+        button.innerHTML = '<div class="hrs">Opening checkout…</div>'
+        try {
+          const res = await fetch('/api/account/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ hours })
+          })
+          const body = await res.json().catch(() => ({}))
+          if (!res.ok || !body.url) throw new Error(body.detail || body.error || 'checkout-failed')
+          location.href = body.url
+        } catch (error) {
+          button.disabled = false
+          button.innerHTML = was
+          banner(
+            String(error.message) === 'payments-not-configured'
+              ? 'Payments are not set up on this site yet.'
+              : 'Could not open checkout. Please try again in a moment.',
+            'bad'
+          )
+        }
+      }
+
+      // -------------------------------------------------------------- sign out
+
+      async function signOut(everywhere) {
+        await fetch('/api/account/logout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ everywhere })
+        }).catch(() => {})
+        location.href = '/login.html'
+      }
+
+      // ------------------------------------------------------------- top-up poll
+
+      /**
+       * Just back from Stripe.
+       *
+       * The webhook is what actually moves the balance, and the browser can
+       * beat it back here by a second or two. Showing the old number and
+       * letting somebody refresh into it is how a purchase comes to look like
+       * it failed, so the page waits for the balance to change instead.
+       */
+      async function afterTopUp(before) {
+        for (let attempt = 0; attempt < 15; attempt++) {
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+          const data = await load()
+          if (!data) return
+          if (data.balance.grantedMs > before) {
+            render(data)
+            banner('Payment received — your hours are on your account.', 'good')
+            return
+          }
+        }
+        banner(
+          'Your payment went through, but the hours are taking longer than usual to appear. ' +
+            'Refresh in a moment, and email us if they are still missing.',
+          'info'
+        )
+      }
+
+      // ----------------------------------------------------------------- start
+
+      try {
+        const data = await load()
+        if (data) {
+          render(data)
+
+          if (params.get('topup')) {
+            // Cleared from the address bar first, so a refresh does not
+            // re-enter the waiting state for a purchase already credited.
+            history.replaceState(null, '', location.pathname)
+            banner('Confirming your payment…', 'info')
+            afterTopUp(data.balance.grantedMs)
+          }
+        }
+      } catch {
+        main.replaceChildren()
+        const note = document.createElement('p')
+        note.className = 'msg bad'
+        note.textContent = 'We could not load your account. Please refresh, or try again shortly.'
+        main.append(note)
+      }
+    </script>
+  </body>
+</html>

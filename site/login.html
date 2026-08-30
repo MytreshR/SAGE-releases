@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign in to SAGE</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#07070c" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%235B4BE8'/%3E%3Cg fill='white'%3E%3Crect x='4.2' y='8.4' width='2.1' height='7.2' rx='1.05'/%3E%3Crect x='7.6' y='5.8' width='2.1' height='12.5' rx='1.05'/%3E%3Crect x='11' y='3.4' width='2.1' height='17.3' rx='1.05'/%3E%3Crect x='14.4' y='5.8' width='2.1' height='12.5' rx='1.05'/%3E%3Crect x='17.8' y='8.4' width='2.1' height='7.2' rx='1.05'/%3E%3C/g%3E%3C/svg%3E"
+    />
+    <style>
+      :root {
+        --bg: #07070c;
+        --panel: #10101a;
+        --line: rgba(255, 255, 255, 0.1);
+        --line-soft: rgba(255, 255, 255, 0.055);
+        --text: #edecf5;
+        --muted: #9b99ad;
+        --dim: #6e6c80;
+        --indigo: #818cf8;
+        --good: #4ade80;
+        --bad: #fca5a5;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 1.5rem;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(50rem 34rem at 20% -12%, rgba(99, 102, 241, 0.16), transparent 60%),
+          radial-gradient(42rem 30rem at 85% 6%, rgba(168, 85, 247, 0.12), transparent 60%);
+      }
+      .card {
+        position: relative;
+        width: 100%;
+        max-width: 430px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 2.2rem;
+      }
+      .mark {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        font-size: 0.82rem;
+        color: var(--dim);
+        margin-bottom: 1.7rem;
+      }
+      .mark a {
+        color: inherit;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+      }
+      h1 {
+        font-size: 1.45rem;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.45rem;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 0.92rem;
+        margin-bottom: 1.7rem;
+      }
+
+      label {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--dim);
+        margin-bottom: 0.5rem;
+      }
+      input {
+        font: inherit;
+        width: 100%;
+        background: #000;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        color: var(--text);
+        padding: 0.8rem 0.95rem;
+        margin-bottom: 1rem;
+      }
+      input:focus {
+        outline: 2px solid var(--indigo);
+        outline-offset: 1px;
+        border-color: transparent;
+      }
+      input#code {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 1.5rem;
+        letter-spacing: 0.42em;
+        text-align: center;
+        padding: 0.75rem 0.5rem 0.75rem 0.92rem;
+      }
+
+      button {
+        font: inherit;
+        font-weight: 600;
+        width: 100%;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        padding: 0.8rem 1rem;
+        cursor: pointer;
+        background: var(--indigo);
+        color: #0b0a14;
+      }
+      button:hover:not(:disabled) {
+        filter: brightness(1.08);
+      }
+      button:disabled {
+        opacity: 0.55;
+        cursor: default;
+      }
+      button.ghost {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--line);
+        color: var(--text);
+      }
+      button.ghost:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      button.link {
+        background: none;
+        border: none;
+        color: var(--muted);
+        width: auto;
+        padding: 0;
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      button.link:hover {
+        color: var(--text);
+      }
+      .google {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.65rem;
+      }
+
+      .or {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        margin: 1.35rem 0;
+        color: var(--dim);
+        font-size: 0.75rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .or::before,
+      .or::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--line-soft);
+      }
+
+      .msg {
+        font-size: 0.86rem;
+        border-radius: 9px;
+        padding: 0.7rem 0.85rem;
+        margin-bottom: 1.1rem;
+        border: 1px solid;
+      }
+      .msg.bad {
+        color: var(--bad);
+        border-color: rgba(252, 165, 165, 0.28);
+        background: rgba(252, 165, 165, 0.07);
+      }
+      .msg.good {
+        color: var(--good);
+        border-color: rgba(74, 222, 128, 0.28);
+        background: rgba(74, 222, 128, 0.07);
+      }
+
+      .foot {
+        margin-top: 1.6rem;
+        padding-top: 1.3rem;
+        border-top: 1px solid var(--line-soft);
+        font-size: 0.8rem;
+        color: var(--dim);
+      }
+      .foot a {
+        color: var(--indigo);
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <div class="mark">
+        <a href="/">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+            <rect width="24" height="24" rx="6" fill="#5B4BE8" />
+            <g fill="#fff">
+              <rect x="4.2" y="8.4" width="2.1" height="7.2" rx="1.05" />
+              <rect x="7.6" y="5.8" width="2.1" height="12.5" rx="1.05" />
+              <rect x="11" y="3.4" width="2.1" height="17.3" rx="1.05" />
+              <rect x="14.4" y="5.8" width="2.1" height="12.5" rx="1.05" />
+              <rect x="17.8" y="8.4" width="2.1" height="7.2" rx="1.05" />
+            </g>
+          </svg>
+          SAGE
+        </a>
+      </div>
+
+      <h1 id="title">Sign in</h1>
+      <p class="sub" id="subtitle">
+        Your hours live on your account, not on one computer. Sign in anywhere and they follow.
+      </p>
+
+      <div id="message" class="msg" hidden></div>
+
+      <!-- Step one: who are you -->
+      <section id="step-email">
+        <button class="ghost google" id="google">
+          <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true">
+            <path
+              fill="#4285F4"
+              d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h11.8c-.5 2.7-2.1 5-4.4 6.6v5.5h7.1c4.2-3.8 6.6-9.5 6.6-16.1z"
+            />
+            <path
+              fill="#34A853"
+              d="M24 46c6 0 11-2 14.6-5.4l-7.1-5.5c-2 1.3-4.5 2.1-7.5 2.1-5.8 0-10.6-3.9-12.4-9.1H4.3v5.7C7.9 41 15.4 46 24 46z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M11.6 28.1c-.4-1.3-.7-2.7-.7-4.1s.3-2.8.7-4.1v-5.7H4.3C2.8 17.1 2 20.4 2 24s.8 6.9 2.3 9.8l7.3-5.7z"
+            />
+            <path
+              fill="#EA4335"
+              d="M24 10.8c3.3 0 6.2 1.1 8.5 3.3l6.3-6.3C35 4.2 30 2 24 2 15.4 2 7.9 7 4.3 14.2l7.3 5.7c1.8-5.2 6.6-9.1 12.4-9.1z"
+            />
+          </svg>
+          Continue with Google
+        </button>
+
+        <div class="or">or</div>
+
+        <form id="email-form">
+          <label for="email">Email address</label>
+          <input
+            id="email"
+            type="email"
+            autocomplete="email"
+            inputmode="email"
+            placeholder="you@example.com"
+            required
+          />
+          <button type="submit" id="send">Email me a code</button>
+        </form>
+      </section>
+
+      <!-- Step two: prove it -->
+      <section id="step-code" hidden>
+        <form id="code-form">
+          <label for="code">Six-digit code</label>
+          <input
+            id="code"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="6"
+            pattern="[0-9]{6}"
+            placeholder="000000"
+            required
+          />
+          <button type="submit" id="verify">Sign in</button>
+        </form>
+        <div class="row">
+          <button class="link" id="back">Use a different address</button>
+          <button class="link" id="resend">Resend code</button>
+        </div>
+      </section>
+
+      <p class="foot">
+        No password to forget — we email a code instead. Signing in creates your account if you do
+        not have one yet.
+        <br /><br />
+        <a href="/">Back to sage</a>
+      </p>
+    </main>
+
+    <script type="module">
+      const $ = (id) => document.getElementById(id)
+      const params = new URLSearchParams(location.search)
+
+      // Where to go once signed in. Only ever a path on this site: taking a
+      // full URL from the query string would turn a genuine SAGE login into a
+      // way of dropping people on somebody else's page.
+      const asked = params.get('next') || '/account.html'
+      const next = asked.startsWith('/') && !asked.startsWith('//') ? asked : '/account.html'
+
+      // Sign-in and sign-up are the same act here, because there is no password
+      // to set - typing your address either finds your account or makes one.
+      // The wording changes so a "Create account" link does not land on a page
+      // headed "Sign in"; the mechanism behind it does not change at all.
+      const SIGNUP = params.get('mode') === 'signup'
+      const LEDE =
+        'Your hours live on your account, not on one computer. Sign in anywhere and they follow.'
+      if (SIGNUP) {
+        $('title').textContent = 'Create your account'
+        $('subtitle').textContent =
+          'Hours you buy live on your account, not on one computer, so they follow you between machines.'
+      }
+
+      const message = $('message')
+      const say = (text, kind = 'bad') => {
+        message.textContent = text
+        message.className = `msg ${kind}`
+        message.hidden = false
+      }
+      const quiet = () => {
+        message.hidden = true
+      }
+
+      // Reasons the OAuth callback bounces people back here. Phrased as things
+      // a person can act on, because that is all they can do about any of them.
+      const OAUTH_ERRORS = {
+        cancelled: 'Google sign-in was cancelled. You can try again, or use a code instead.',
+        'google-not-configured':
+          'Google sign-in is not set up on this site yet. Use a code instead.',
+        'google-refused': 'Google would not complete the sign-in. Try again, or use a code instead.',
+        'google-failed':
+          'Something went wrong talking to Google. Try again, or use a code instead.',
+        'state-mismatch': 'That sign-in link did not start here. Please try again.',
+        'state-expired': 'That sign-in took too long and expired. Please try again.',
+        'bad-callback': 'Google sent us back an incomplete answer. Please try again.'
+      }
+      const failed = params.get('error')
+      if (failed) {
+        say(OAUTH_ERRORS[failed] || 'Sign-in did not complete. Please try again.')
+        // Cleaned out of the address bar so a refresh does not re-show it.
+        const keep = new URLSearchParams()
+        if (params.get('next')) keep.set('next', next)
+        if (SIGNUP) keep.set('mode', 'signup')
+        // toString rather than .size, which Safari only learned in 17.
+        const query = keep.toString()
+        history.replaceState(null, '', location.pathname + (query ? `?${query}` : ''))
+      }
+
+      $('google').addEventListener('click', () => {
+        location.href = `/api/auth/google/start?next=${encodeURIComponent(next)}`
+      })
+
+      let address = ''
+
+      async function sendCode(email) {
+        const res = await fetch('/api/auth/code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        })
+        if (res.ok) return
+        const body = await res.json().catch(() => ({}))
+        throw new Error(
+          body.error === 'email-not-configured'
+            ? 'Email sign-in is not set up on this site yet. Use Google instead.'
+            : body.error === 'bad-email'
+              ? 'That does not look like an email address.'
+              : 'We could not send the code. Please try again in a moment.'
+        )
+      }
+
+      $('email-form').addEventListener('submit', async (event) => {
+        event.preventDefault()
+        quiet()
+        const email = $('email').value.trim()
+        if (!email) return
+
+        $('send').disabled = true
+        $('send').textContent = 'Sending…'
+        try {
+          await sendCode(email)
+          address = email
+          $('step-email').hidden = true
+          $('step-code').hidden = false
+          $('title').textContent = 'Check your email'
+          $('subtitle').textContent =
+            `We sent a six-digit code to ${email}. It expires in ten minutes.`
+          $('code').focus()
+        } catch (error) {
+          say(error.message)
+        } finally {
+          $('send').disabled = false
+          $('send').textContent = 'Email me a code'
+        }
+      })
+
+      // Reasons a code is refused. All of them are the person's to fix, and
+      // none says whether the address has an account - which is the whole
+      // reason /api/auth/code answers the same way either way.
+      const CODE_ERRORS = {
+        'no-code': 'That code has expired or was already used. Ask for a new one.',
+        expired: 'That code has expired. Ask for a new one.',
+        'too-many-attempts': 'Too many wrong tries. Ask for a new code.',
+        'wrong-code': 'That code is not right.'
+      }
+
+      $('code-form').addEventListener('submit', async (event) => {
+        event.preventDefault()
+        quiet()
+
+        $('verify').disabled = true
+        $('verify').textContent = 'Signing in…'
+        try {
+          const res = await fetch('/api/auth/web-verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: address, code: $('code').value.trim() })
+          })
+          const body = await res.json().catch(() => ({}))
+          if (!res.ok) {
+            const base = CODE_ERRORS[body.error] || 'We could not sign you in.'
+            // How many guesses are left, when the server says. Six digits is a
+            // million possibilities and tries are capped at five, so this is
+            // the difference between retyping and asking for a new code.
+            say(
+              typeof body.left === 'number' && body.left > 0
+                ? `${base} ${body.left} tries left.`
+                : base
+            )
+            $('code').select()
+            return
+          }
+          location.href = next
+        } catch {
+          say('Could not reach the server. Check your connection and try again.')
+        } finally {
+          $('verify').disabled = false
+          $('verify').textContent = 'Sign in'
+        }
+      })
+
+      $('back').addEventListener('click', () => {
+        quiet()
+        $('step-code').hidden = true
+        $('step-email').hidden = false
+        $('title').textContent = SIGNUP ? 'Create your account' : 'Sign in'
+        $('subtitle').textContent = LEDE
+        $('code').value = ''
+        $('email').focus()
+      })
+
+      $('resend').addEventListener('click', async () => {
+        quiet()
+        $('resend').disabled = true
+        try {
+          await sendCode(address)
+          say('A new code is on its way.', 'good')
+        } catch (error) {
+          say(error.message)
+        } finally {
+          $('resend').disabled = false
+        }
+      })
+    </script>
+  </body>
+</html>

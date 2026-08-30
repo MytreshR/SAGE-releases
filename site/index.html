@@ -220,6 +220,24 @@
         color: var(--text);
       }
 
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 1.15rem;
+      }
+
+      .nav-signin {
+        font-size: 0.9rem;
+        color: var(--muted);
+        text-decoration: none;
+        white-space: nowrap;
+        transition: color 0.18s;
+      }
+
+      .nav-signin:hover {
+        color: var(--text);
+      }
+
       /* Under 760px the links used to be hidden with nothing in their place,
          which left phone users no way to navigate. Now they scroll. */
       @media (max-width: 760px) {
@@ -246,6 +264,14 @@
 
         .nav-links a {
           white-space: nowrap;
+        }
+
+        .nav-actions {
+          gap: 0.85rem;
+        }
+
+        .nav-signin {
+          font-size: 0.84rem;
         }
       }
 
@@ -1291,12 +1317,18 @@
           <a href="#faq">FAQ</a>
           <a href="#pricing">Pricing</a>
         </nav>
-        <a
-          class="btn btn-primary"
-          style="padding: 0.55rem 1rem; font-size: 0.86rem"
-          href="/download"
-          >Download</a
-        >
+        <div class="nav-actions">
+          <!-- Sign in rather than Log in, because for most people arriving
+               here it is also the sign-up: there is no password to create, so
+               the two are the same act. -->
+          <a class="nav-signin" href="/account.html">Sign in</a>
+          <a
+            class="btn btn-primary"
+            style="padding: 0.55rem 1rem; font-size: 0.86rem"
+            href="/download"
+            >Download</a
+          >
+        </div>
       </div>
     </header>
 

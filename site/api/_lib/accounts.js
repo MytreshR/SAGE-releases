@@ -108,11 +108,40 @@ const blank = (email) => ({
   activeDevice: null,
   /** Changes on every sign-in, which is what invalidates the previous token. */
   session: null,
+  /**
+   * The browser's session, deliberately kept apart from the device's.
+   *
+   * Signing in on the website to look at a balance must not end an interview
+   * that is happening right now. One nonce for both would mean exactly that:
+   * opening the account page rotates `session`, and the desktop token stops
+   * verifying on its next heartbeat - mid-answer, with no way to tell the user
+   * why. So the desktop token names `session`, the website's names
+   * `webSession`, and rotating either leaves the other alone.
+   *
+   * "One machine at a time" still holds, because it was only ever about the
+   * thing that spends hours, and a browser tab spends none.
+   */
+  webSession: null,
+  /**
+   * Top-ups, oldest first. What the account page shows as receipts.
+   *
+   * Kept on the account rather than assembled from Stripe on each page load:
+   * the balance and the list of what produced it have to agree, and the only
+   * way to guarantee that is for the same write to do both.
+   */
+  txns: [],
   lastSeenAt: Date.now()
 })
 
 export async function getAccount(email) {
-  return (await get(keyFor(email))) || null
+  const record = await get(keyFor(email))
+  if (!record) return null
+  // Accounts written before web sessions and receipts existed are missing both
+  // fields. Filled in on read rather than by a migration pass, because there is
+  // no way to enumerate accounts - the keys are hashes, which is the point.
+  if (!Array.isArray(record.txns)) record.txns = []
+  if (record.webSession === undefined) record.webSession = null
+  return record
 }
 
 export async function ensureAccount(email) {
@@ -150,6 +179,43 @@ export async function signIn(email, deviceId) {
 }
 
 /**
+ * Signs a browser in, and signs no device out.
+ *
+ * The counterpart to signIn, and the difference is the whole reason both
+ * exist: this touches `webSession` only. Somebody checking their balance on
+ * their phone while SAGE is listening on their laptop is the ordinary case,
+ * not an attempt to share a licence, and it must not cost them the interview.
+ *
+ * A browser session does not rotate the previous one either, so the website
+ * stays signed in on a phone and a desktop at once. Nothing here spends
+ * hours; the scarce thing is still guarded by signIn.
+ */
+export async function signInWeb(email) {
+  const account = await ensureAccount(email)
+  if (!account.webSession) account.webSession = randomBytes(16).toString('hex')
+  await saveAccount(account)
+  return { account, token: mintWebToken(account) }
+}
+
+/**
+ * Ends every session at once - browser and device.
+ *
+ * The one button on the account page that can actually cut off a machine, and
+ * the reason it is there: an account is hours, and hours are money. If a
+ * laptop is lost or a login shared with somebody it should not have been,
+ * this is what takes it back. Rotating both nonces invalidates every token
+ * already issued without needing a list of them.
+ */
+export async function signOutEverywhere(email) {
+  const account = await getAccount(email)
+  if (!account) return null
+  account.session = randomBytes(16).toString('hex')
+  account.webSession = randomBytes(16).toString('hex')
+  account.activeDevice = null
+  return saveAccount(account)
+}
+
+/**
  * A bearer token the app keeps. Signed rather than stored, so verifying it
  * costs one HMAC instead of a round trip - but bound to the account's current
  * session, so it is not valid a moment longer than the account says.
@@ -168,7 +234,16 @@ export function mintToken(account, deviceId) {
  * what makes signing in elsewhere take effect immediately rather than whenever
  * a token happens to expire.
  */
-export async function readToken(token, deviceId) {
+/**
+ * Where a device token says which machine it names, a browser token says the
+ * literal string `web`. A device id is 64 hex characters, so the two can never
+ * be mistaken for each other by accident - and the checks below refuse the
+ * swap deliberately, so a token for one cannot be presented as the other.
+ */
+const WEB = 'web'
+
+/** Verifies our signature and splits the payload, or null. Shared by both readers. */
+function openToken(token) {
   if (typeof token !== 'string' || !token.includes('.')) return null
   const [encoded, signature] = token.split('.')
   let payload
@@ -183,12 +258,50 @@ export async function readToken(token, deviceId) {
   const b = Buffer.from(signature || '', 'utf8')
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null
 
-  const [email, tokenDevice, session] = payload.split(':')
+  const [email, subject, session] = payload.split(':')
   if (!email || !session) return null
-  if (deviceId && tokenDevice !== deviceId) return null
+  return { email, subject, session }
+}
+
+export async function readToken(token, deviceId) {
+  const opened = openToken(token)
+  if (!opened) return null
+  const { email, subject, session } = opened
+
+  // A browser token is not a device token. Both are signed by the same secret,
+  // so without this a session minted by clicking "Sign in with Google" - which
+  // proves an email address and nothing about a machine - would spend hours as
+  // though it were the one signed-in device.
+  if (subject === WEB) return null
+  if (deviceId && subject !== deviceId) return null
 
   const account = await getAccount(email)
   if (!account || account.session !== session) return null
+  return account
+}
+
+/**
+ * A browser session. Signed the same way, checked against the other nonce.
+ *
+ * Carries no device, because the website is not a device: it reads a balance
+ * and starts a checkout, and neither of those spends listening time.
+ */
+export function mintWebToken(account) {
+  const payload = [normalise(account.email), WEB, account.webSession, Date.now()].join(':')
+  const signature = createHmac('sha256', secret()).update(payload).digest('base64url')
+  return `${Buffer.from(payload, 'utf8').toString('base64url')}.${signature}`
+}
+
+export async function readWebToken(token) {
+  const opened = openToken(token)
+  if (!opened) return null
+  const { email, subject, session } = opened
+  // And the mirror of the check above: a desktop token must not read an
+  // account page, or a stolen one would be a login as well as a licence.
+  if (subject !== WEB) return null
+
+  const account = await getAccount(email)
+  if (!account || !account.webSession || account.webSession !== session) return null
   return account
 }
 
@@ -203,6 +316,90 @@ export async function grantSerial(email, serial) {
   if (account.serials.includes(serial)) return account
   account.serials.push(serial)
   account.grantedMs += hoursForSerial(serial) * 60 * 60 * 1000
+  return saveAccount(account)
+}
+
+/**
+ * Credits a purchase to an account, once.
+ *
+ * The signed-in path does not mint a key at all: hours land here and the app
+ * spends them wherever the person is signed in. That is what makes them
+ * portable, and it is also why this has to be idempotent - Stripe retries
+ * webhooks, and delivering the same event twice must not buy the hours twice.
+ * The checkout session id is the thing that makes a payment unique, so that is
+ * what gets checked.
+ *
+ * Returns the account, with the top-up appended to its receipts. Balance and
+ * receipts are written together in one save on purpose: they are two views of
+ * the same fact, and a customer whose balance and history disagree has no way
+ * to tell which one is lying.
+ */
+export async function credit(email, { hours, sessionId, amount, currency, source = 'stripe' }) {
+  const account = await ensureAccount(email)
+
+  if (sessionId && account.txns.some((t) => t.sessionId === sessionId)) {
+    // Already credited. Not an error - this is Stripe redelivering, which is
+    // ordinary and expected.
+    return account
+  }
+
+  const ms = Math.round(Number(hours) * 60 * 60 * 1000)
+  if (!Number.isFinite(ms) || ms <= 0) throw new Error(`refusing to credit ${hours} hours`)
+
+  account.grantedMs += ms
+  account.txns.push({
+    id: randomBytes(8).toString('hex'),
+    at: Date.now(),
+    hours: Number(hours),
+    ms,
+    amount: amount ?? null,
+    currency: currency ?? null,
+    sessionId: sessionId ?? null,
+    source
+  })
+
+  return saveAccount(account)
+}
+
+/**
+ * Takes a top-up back off an account, after a refund or a dispute.
+ *
+ * The attack this closes is the same one revoke.js closes for keys: pay with a
+ * stolen card, spend the hours the same afternoon, and let the real cardholder
+ * dispute it three weeks later. Hours are the vendor's money the moment they
+ * are used, so the balance has to move back when the payment does.
+ *
+ * Only ever removes what that payment actually added, and only once - the
+ * reversal is recorded as its own entry, which is both the audit trail and the
+ * idempotency check. Stripe sends a refund and a dispute for the same charge
+ * often enough that debiting per delivery would take the hours twice.
+ *
+ * grantedMs can end up below usedMs, and that is deliberate: `remainingMs`
+ * floors at zero, so an account that already spent disputed hours reads as
+ * empty rather than going negative and quietly crediting itself back on the
+ * next top-up.
+ */
+export async function debit(email, { sessionId, reason = 'refund' }) {
+  const account = await getAccount(email)
+  if (!account) return null
+
+  const original = account.txns.find((t) => t.sessionId === sessionId && t.ms > 0)
+  if (!original) return account
+  if (account.txns.some((t) => t.reverses === original.id)) return account
+
+  account.grantedMs = Math.max(0, (account.grantedMs || 0) - original.ms)
+  account.txns.push({
+    id: randomBytes(8).toString('hex'),
+    at: Date.now(),
+    hours: -original.hours,
+    ms: -original.ms,
+    amount: original.amount === null ? null : -original.amount,
+    currency: original.currency,
+    sessionId,
+    source: reason,
+    reverses: original.id
+  })
+
   return saveAccount(account)
 }
 
