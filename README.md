@@ -23,29 +23,48 @@ Windows 10/11, 64-bit.
    looks: it grounds the answers *and* improves speech recognition of your own
    employers and technologies.
 3. **Allow microphone access** when prompted.
-4. **Press Start.** The first 13 minutes are free and need no API key.
+4. **Press Start.** The first 13 minutes are free and need no account at all.
+5. **Sign in** (Settings → App → Account) once you have bought hours, and they
+   work on whichever computer you are signed in to.
 
 ## Pricing
 
 | | |
 | --- | --- |
-| **Free trial** | 13 minutes of session time, once per computer. Every feature, no API key, no card. |
-| **SAGE — $159.99** | One payment. Unlocks SAGE permanently on one computer. No subscription. |
+| **Free trial** | 13 minutes, once per computer. Every feature, no account, no card. |
+| **3 hours** | $14.99 |
+| **5 hours** | $17.99 |
 
-Once your trial runs out, Settings → Activation takes the key from your receipt.
-Activation is tied to that computer and works offline from then on.
+No subscription. Hours stack if you buy more, and they never expire.
+
+Time is counted only while SAGE is **listening** — a session left open with
+capture stopped costs nothing, so you can set it up before a call and not watch
+the clock.
+
+### Your hours follow you, not your computer
+
+Buy while signed in and the hours go to your account rather than to one machine.
+Install SAGE anywhere, sign in, and your balance is there — so a laptop left at
+home stops being a problem you solve by buying a second licence.
+
+One computer at a time: signing in on another moves your hours there and signs
+the first one out.
+
+Sign in with Google, or with a six-digit code sent to your email. There is no
+password to create or forget. Your balance, top-ups and receipts live at
+[sagemeeting-ai.xyz/account.html](https://www.sagemeeting-ai.xyz/account.html).
 
 Source licensing is separate — see below.
 
-### About the API key
+### No API key needed
 
-The trial runs on our account. **After activating, SAGE runs on your own OpenAI
-account**: add a key in Settings (the field appears once you activate) and create
-one at [platform.openai.com/api-keys](https://platform.openai.com/api-keys).
-Nothing is billed by SAGE and there is no subscription — transcription and
-answers are charged to your OpenAI account at OpenAI's rates, usually a small
-fraction of a dollar per interview. The key never leaves your machine except to
-call OpenAI directly.
+**SAGE runs on our OpenAI account, not yours.** There is nothing to sign up for
+at OpenAI, no key to paste, and no second bill to watch: the hours you buy cover
+the transcription and the answers.
+
+(Older versions worked the other way round — you activated a key and then
+supplied your own OpenAI key. Keys issued that way still work, and add hours to
+the computer that redeems them.)
 
 ## What it does
 
@@ -65,7 +84,7 @@ call OpenAI directly.
 
 - Windows 10 or 11 (64-bit)
 - A microphone, or system audio capture
-- An OpenAI API key — only after the free trial; the trial needs nothing
+- Nothing else. No OpenAI account, no API key, no card for the trial.
 
 ## Licence
 
@@ -83,6 +102,15 @@ current release, or $1,999.99 for the full source including every future version
 Enquiries welcome; please get in touch rather than extracting it:
 
 > **mytresh1984@outlook.com**
+
+## Privacy
+
+SAGE does not store your audio, your transcripts, or the answers it gives you.
+Audio is transcribed and answered as it happens and is never written to a server
+we run; your session history stays encrypted on your own machine. What we keep is
+your email address, your balance, and your receipts.
+
+Full detail: [Privacy](https://www.sagemeeting-ai.xyz/privacy.html).
 
 ## Responsible use
 
