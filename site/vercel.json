@@ -28,7 +28,7 @@
   "redirects": [
     {
       "source": "/download",
-      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.1.1-setup.exe",
+      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.2.0-setup.exe",
       "permanent": false
     }
   ]
