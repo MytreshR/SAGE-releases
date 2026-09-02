@@ -123,6 +123,88 @@
         }
       }
 
+      /* ---------------------------------------------------------- the field
+
+         A row of bars along the bottom of the viewport, fixed, so the page
+         scrolls over a horizon that stays put.
+
+         Three things keep it ambience rather than decoration: it is masked to
+         nothing before it reaches the content, the bars breathe on a stagger
+         slow enough that you never catch the whole row moving at once, and the
+         alpha is low enough to survive being looked at every day. */
+      .sage-field {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 38vh;
+        min-height: 220px;
+        z-index: 0;
+        pointer-events: none;
+        display: flex;
+        align-items: flex-end;
+        gap: 0.55vw;
+        padding: 0 2vw;
+        /* Dissolves upward instead of ending in a hard line. Without this the
+           field reads as a chart pinned to the bottom of the window. */
+        -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0.55) 42%, transparent 96%);
+        mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0.55) 42%, transparent 96%);
+      }
+
+      .sage-field i {
+        flex: 1 1 0;
+        display: block;
+        border-radius: 99px 99px 0 0;
+        transform-origin: bottom center;
+        background: linear-gradient(
+          to top,
+          rgba(14, 165, 233, 0.3),
+          rgba(56, 189, 248, 0.13) 55%,
+          rgba(56, 189, 248, 0)
+        );
+        animation: field-breathe var(--dur) ease-in-out infinite;
+        animation-delay: var(--delay);
+      }
+
+      @keyframes field-breathe {
+        0%,
+        100% {
+          transform: scaleY(0.72);
+        }
+        50% {
+          transform: scaleY(1);
+        }
+      }
+
+      /* -------------------------------------------------------------- grain
+
+         The thing that separates a designed light page from a blank one. A
+         white ground with no texture reads as an unstyled document; a couple of
+         percent of noise reads as paper. Multiply so it darkens the whites
+         without dirtying the blues.
+
+         Overrides the flat corner watermark mark.css paints for the other
+         pages - this page has the field instead. */
+      body::after {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        opacity: 0.032;
+        mix-blend-mode: multiply;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+        background-size: 140px 140px;
+        width: auto;
+        height: auto;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .sage-field i {
+          animation: none;
+        }
+      }
+
       .wrap {
         position: relative;
         z-index: 1;
@@ -461,16 +543,44 @@
         color: var(--text);
       }
 
+      /* A caveat, styled as one: a quiet chip that sits under the buttons
+         rather than a paragraph floating in the middle of the hero. It has to
+         be readable by anyone about to download the Mac build and ignorable by
+         everyone else, which is a smaller job than the body copy around it. */
       .cta-gatekeeper {
-        margin: 0.85rem auto 0;
-        max-width: 34rem;
-        font-size: 0.83rem;
-        line-height: 1.55;
-        color: var(--muted);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 1.1rem auto 0;
+        padding: 0.42rem 0.85rem;
+        border: 1px solid var(--line-soft);
+        border-radius: 99px;
+        background: var(--panel);
+        font-size: 0.8rem;
+        line-height: 1.4;
+        color: var(--dim);
+        text-align: left;
+      }
+
+      .cta-gatekeeper svg {
+        flex-shrink: 0;
+        opacity: 0.7;
       }
 
       .cta-gatekeeper b {
-        color: var(--text);
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      /* The pill shape stops working once the text wraps to two lines. */
+      @media (max-width: 560px) {
+        .cta-gatekeeper {
+          border-radius: 12px;
+          align-items: flex-start;
+        }
+        .cta-gatekeeper svg {
+          margin-top: 0.15rem;
+        }
       }
 
       .cta-note {
@@ -1468,6 +1578,14 @@
   <body>
     <a class="skip" href="#top">Skip to content</a>
 
+    <!-- The waveform horizon.
+         A corner watermark left the rest of a white page empty; this uses the
+         width. Bars are generated at the end of the page and animate on a slow
+         travelling stagger, masked so they dissolve upward into the paper.
+         It is the product drawn as ambience: SAGE listens, and this is what
+         listening looks like. -->
+    <div class="sage-field" id="sage-field" aria-hidden="true"></div>
+
     <header>
       <div class="wrap nav">
         <!-- The same waveform the app animates in its own title bar. See
@@ -1528,31 +1646,31 @@
         </p>
         <!-- NOTE: the download href below names the release asset exactly.
              Bump it on every release or the button 404s. -->
+        <!-- Both platforms, both real buttons, both always here.
+             Detection decides which one is filled, never which one exists -
+             somebody on a work Windows laptop downloading for the Mac at home
+             must not have to fight the page for the right file. It also means
+             a no-JS visitor sees the full choice rather than a guess. -->
         <div class="cta-row">
-          <!-- Windows in the markup, because it is the larger audience and
-               because a no-JS visitor has to be given something rather than a
-               chooser that never resolves. The script at the end of the page
-               rewrites these for a Mac visitor. -->
-          <a class="btn btn-primary" href="/download/win" data-dl data-dl-label>
+          <a class="btn btn-primary" href="/download/win" id="dl-win">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span data-dl-text>Download for Windows</span>
+            Download for Windows
           </a>
-          <a class="btn btn-ghost" href="#how">See how it works</a>
+          <a class="btn btn-ghost" href="/download/mac" id="dl-mac">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download for macOS
+          </a>
         </div>
         <p class="cta-note">13 minutes free · No API key needed, ever</p>
-        <!-- Always rendered, and always the other platform. Detection is a
-             guess - somebody on a work Windows laptop buying for their Mac at
-             home must not have to fight the page for the right file. -->
-        <p class="cta-alt">
-          <a href="/download/mac" data-dl-other>Also available for macOS</a>
-        </p>
-        <!-- Shown only to Mac visitors, by the script below. Unsigned builds
-             give a "cannot be opened because the developer cannot be verified"
-             dialog with no visible way past it, and people conclude the file is
-             broken. One sentence turns that into a known step. -->
-        <p class="cta-gatekeeper" id="mac-note" hidden>
-          macOS will warn that SAGE is from an unidentified developer — right-click the app and
-          choose <b>Open</b> the first time to get past it.
+        <p class="cta-alt"><a href="#how">See how it works</a></p>
+        <!-- Always shown, not just to Mac visitors: the Mac button is on the
+             page for everyone now, so anyone can be the person who needs this.
+             Unsigned builds give a "cannot be opened because the developer
+             cannot be verified" dialog with no visible way past it, and people
+             conclude the file is broken rather than that it needs one gesture. -->
+        <p class="cta-gatekeeper" id="mac-note">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>macOS isn’t code-signed yet — right-click the app and choose <b>Open</b> on first launch.</span>
         </p>
 
         <div class="hero-shot reveal">
@@ -2261,14 +2379,18 @@
             13 minutes free, no key needed. Then buy hours as you use them &mdash; no
             subscription, no OpenAI account, nothing stored.
           </p>
+          <!-- Both platforms here too. This is the last thing on the page, so
+               a Mac visitor who scrolled the whole way must not be handed a
+               Windows button as the only way to act. -->
           <div class="cta-row">
-            <a class="btn btn-primary" href="/download/win" data-dl data-dl-label
-              ><span data-dl-text>Download for Windows</span></a
-            >
-            <a class="btn btn-ghost" href="mailto:mytresh1984@outlook.com?subject=SAGE%20source%20licensing"
+            <a class="btn btn-primary" href="/download/win" id="dl-win-2">Download for Windows</a>
+            <a class="btn btn-ghost" href="/download/mac" id="dl-mac-2">Download for macOS</a>
+          </div>
+          <p class="cta-alt">
+            <a href="mailto:mytresh1984@outlook.com?subject=SAGE%20source%20licensing"
               >Licence the source</a
             >
-          </div>
+          </p>
           <p class="cta-note">
             SAGE is proprietary software distributed as a compiled application. The source is
             available for licensing — enquiries welcome.
@@ -2675,6 +2797,55 @@
 
     <script>
       /**
+       * Draw the waveform horizon.
+       *
+       * Generated rather than written out: fifty-odd bars of markup would be
+       * fifty-odd lines nobody can read, and the heights are a curve, which is
+       * a thing to express as a curve rather than as a table of numbers.
+       *
+       * The envelope is three overlapping sines at unrelated frequencies. One
+       * sine is a wave, two is a pattern, three stops repeating within the
+       * width of a screen - which is what makes it read as a recording of
+       * something rather than as a graphic.
+       *
+       * Durations and delays vary per bar so the row never pulses in unison.
+       */
+      ;(function () {
+        var field = document.getElementById('sage-field')
+        if (!field) return
+
+        // Enough to read as a waveform, few enough to stay cheap. Every bar is
+        // a compositor layer, so this is the number that decides whether the
+        // page still scrolls at sixty frames on a laptop.
+        var N = window.innerWidth < 720 ? 28 : 56
+        var html = ''
+
+        for (var i = 0; i < N; i++) {
+          var t = i / (N - 1)
+          var env =
+            0.34 +
+            0.3 * Math.sin(t * Math.PI * 3.1 + 0.4) +
+            0.2 * Math.sin(t * Math.PI * 7.3 + 1.9) +
+            0.11 * Math.sin(t * Math.PI * 13.7)
+
+          // Taper the ends so the row grows out of the edges of the window
+          // instead of being chopped off by them.
+          env *= 0.35 + 0.65 * Math.sin(Math.PI * t)
+
+          var h = Math.max(4, Math.min(100, env * 100))
+          var dur = (3.8 + (i % 7) * 0.42).toFixed(2)
+          var delay = (i * 0.075).toFixed(3)
+
+          html +=
+            '<i style="height:' + h.toFixed(1) + '%;--dur:' + dur + 's;--delay:' + delay + 's"></i>'
+        }
+
+        field.innerHTML = html
+      })()
+    </script>
+
+    <script>
+      /**
        * Offer the build that matches the machine asking.
        *
        * The markup ships Windows, so a visitor with no JavaScript still gets a
@@ -2702,19 +2873,33 @@
 
         if (!isMac) return
 
+        // The hero carries both buttons already, so nothing is added or
+        // removed here - only which of the two is the filled one, and which
+        // comes first. A Windows visitor still sees the Mac button and a Mac
+        // visitor still sees the Windows one; detection changes emphasis, not
+        // availability, so being wrong about the OS costs a glance rather than
+        // a dead end.
+        ;[
+          ['dl-win', 'dl-mac'],
+          ['dl-win-2', 'dl-mac-2']
+        ].forEach(function (pair) {
+          var win = document.getElementById(pair[0])
+          var mac = document.getElementById(pair[1])
+          if (!win || !mac) return
+          mac.className = 'btn btn-primary'
+          win.className = 'btn btn-ghost'
+          // Reordered with flexbox rather than by moving nodes, so the markup
+          // keeps Windows first for anything reading the page without CSS.
+          mac.style.order = '-1'
+        })
+
+        // The compact links elsewhere on the page - header, pricing, footer -
+        // have room for one platform only, so those do get swapped outright.
         Array.prototype.forEach.call(document.querySelectorAll('[data-dl]'), function (el) {
           el.setAttribute('href', '/download/mac')
           var label = el.querySelector('[data-dl-text]')
           if (label) label.textContent = 'Download for macOS'
         })
-
-        Array.prototype.forEach.call(document.querySelectorAll('[data-dl-other]'), function (el) {
-          el.setAttribute('href', '/download/win')
-          el.textContent = 'Also available for Windows'
-        })
-
-        var note = document.getElementById('mac-note')
-        if (note) note.hidden = false
       })()
     </script>
 

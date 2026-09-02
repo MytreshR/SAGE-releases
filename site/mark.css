@@ -89,26 +89,106 @@ a.sage-mark:hover {
 
 /* ---------------------------------------------------------------- watermark
 
-   The mark again, very large and very faint, stamped behind the page.
+   The mark again, very large, very faint, and alive.
 
-   The same idea as the watermark in the app's empty answer panel: it says whose
-   page this is without asking to be read. Two things keep it from becoming
-   clutter — it is fixed, so it sits still while the page scrolls over it rather
-   than sliding about, and it is at 4.5% opacity, which is enough to notice once
-   and never again.
+   A static logo stamped in the corner reads as a sticker. The same shape
+   breathing reads as the product listening, which is what SAGE actually does -
+   so the motion is not decoration, it is the mark saying what it is.
 
-   Drawn from the same five-bar geometry as the mark itself. Navy rather than
-   the sky blue of the live mark: a coloured shape this size stops reading as a
-   watermark and starts reading as a graphic somebody forgot to remove.
+   Deliberately slow. Seven seconds a cycle against the header logo's 2.6, with
+   a long stagger between bars, so it reads as a tide rather than a meter. The
+   whole thing also drifts a few pixels over half a minute: nothing you can
+   catch moving, but enough that the corner is never quite the same twice.
 
-   Sits at z-index 0, and every page's content sits at 1 or above. Not -1, which
-   would put it behind the body's own background and hide it completely. */
+   Opacity peaks at 7% and troughs at 4%. Past about 8% it stops being a
+   watermark and starts competing with the text; below 3% the motion is
+   invisible and the whole thing is wasted effort.
+
+   The pages that do not carry the markup fall back to the flat CSS stamp
+   below, which is why body::after still exists. */
+.sage-watermark {
+  position: fixed;
+  right: 4vmin;
+  bottom: 4vmin;
+  width: 42vmin;
+  height: 42vmin;
+  z-index: 0;
+  pointer-events: none;
+  animation: wm-drift 34s ease-in-out infinite alternate;
+}
+
+.sage-watermark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* transform-box again - without it a scale on an SVG rect grows from the
+   viewBox origin and the bars slide out of the mark instead of pulsing. */
+.wm-bar {
+  fill: #0b2545;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: wm-breathe 7s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 420ms);
+}
+
+@keyframes wm-breathe {
+  0%,
+  100% {
+    transform: scaleY(0.8);
+    opacity: 0.04;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 0.07;
+  }
+}
+
+@keyframes wm-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-1.4vmin, -2vmin, 0);
+  }
+}
+
+/* A page carrying its own background treatment must not also paint the flat
+   corner stamp behind it. index.html has the waveform field and its own grain
+   layer; the utility pages keep the stamp. */
+body:has(.sage-watermark)::after,
+body:has(.sage-field)::after {
+  display: none;
+}
+
+/* Motion off, mark kept. Something this large moving is a real problem for
+   some people, and it is on every screen of the page. */
+@media (prefers-reduced-motion: reduce) {
+  .sage-watermark {
+    animation: none;
+  }
+  .wm-bar {
+    animation: none;
+    opacity: 0.05;
+  }
+}
+
+/* On a narrow screen it would sit under the text rather than beside it, and a
+   watermark competing with body copy is just noise. */
+@media (max-width: 720px) {
+  .sage-watermark {
+    width: 34vmin;
+    height: 34vmin;
+  }
+}
+
+/* ------------------------------------------------- flat fallback watermark
+
+   For pages without the live markup. Same geometry, same colour, no motion. */
 body::after {
   content: '';
   position: fixed;
-  /* Fully inside the corner rather than bleeding off it. Clipped by the
-     viewport edge, the bars read as a graphic that overflowed; sitting whole in
-     the corner, they read as a stamp. */
   right: 4vmin;
   bottom: 4vmin;
   width: 40vmin;
@@ -121,8 +201,6 @@ body::after {
       center / contain no-repeat;
 }
 
-/* On a narrow screen it would sit under the text rather than beside it, and a
-   watermark competing with body copy is just noise. */
 @media (max-width: 720px) {
   body::after {
     opacity: 0.035;
