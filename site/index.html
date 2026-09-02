@@ -445,6 +445,34 @@
         flex-wrap: wrap;
       }
 
+      .cta-alt {
+        margin-top: 0.5rem;
+        font-size: 0.86rem;
+        color: var(--dim);
+      }
+
+      .cta-alt a {
+        color: var(--muted);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .cta-alt a:hover {
+        color: var(--text);
+      }
+
+      .cta-gatekeeper {
+        margin: 0.85rem auto 0;
+        max-width: 34rem;
+        font-size: 0.83rem;
+        line-height: 1.55;
+        color: var(--muted);
+      }
+
+      .cta-gatekeeper b {
+        color: var(--text);
+      }
+
       .cta-note {
         margin-top: 1.1rem;
         font-size: 0.82rem;
@@ -1477,7 +1505,8 @@
           <a
             class="btn btn-primary"
             style="padding: 0.55rem 1rem; font-size: 0.86rem"
-            href="/download"
+            href="/download/win"
+            data-dl
             >Download</a
           >
         </div>
@@ -1487,7 +1516,7 @@
     <main id="top">
       <!-- hero -->
       <div class="wrap hero">
-        <div class="pill"><span class="dot"></span> Version 1.2.0 · Windows 10/11</div>
+        <div class="pill"><span class="dot"></span> Version 1.2.0 · Windows &amp; macOS</div>
         <h1>
           Answers on screen<br />
           <span class="h1-accent">while they're still asking.</span>
@@ -1500,16 +1529,31 @@
         <!-- NOTE: the download href below names the release asset exactly.
              Bump it on every release or the button 404s. -->
         <div class="cta-row">
-          <a
-            class="btn btn-primary"
-            href="/download"
-          >
+          <!-- Windows in the markup, because it is the larger audience and
+               because a no-JS visitor has to be given something rather than a
+               chooser that never resolves. The script at the end of the page
+               rewrites these for a Mac visitor. -->
+          <a class="btn btn-primary" href="/download/win" data-dl data-dl-label>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download for Windows
+            <span data-dl-text>Download for Windows</span>
           </a>
           <a class="btn btn-ghost" href="#how">See how it works</a>
         </div>
-        <p class="cta-note">13 minutes free · 95 MB · No API key needed, ever</p>
+        <p class="cta-note">13 minutes free · No API key needed, ever</p>
+        <!-- Always rendered, and always the other platform. Detection is a
+             guess - somebody on a work Windows laptop buying for their Mac at
+             home must not have to fight the page for the right file. -->
+        <p class="cta-alt">
+          <a href="/download/mac" data-dl-other>Also available for macOS</a>
+        </p>
+        <!-- Shown only to Mac visitors, by the script below. Unsigned builds
+             give a "cannot be opened because the developer cannot be verified"
+             dialog with no visible way past it, and people conclude the file is
+             broken. One sentence turns that into a known step. -->
+        <p class="cta-gatekeeper" id="mac-note" hidden>
+          macOS will warn that SAGE is from an unidentified developer — right-click the app and
+          choose <b>Open</b> the first time to get past it.
+        </p>
 
         <div class="hero-shot reveal">
           <img
@@ -2126,7 +2170,7 @@
               <li><svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span>Runs on our account, not yours</span></li>
               <li style="color: var(--dim)">&mdash; 13 minutes of listening time in total</li>
             </ul>
-            <a class="btn btn-ghost" style="justify-content: center" href="/download">Download for Windows</a>
+            <a class="btn btn-ghost" style="justify-content: center" href="/download/win" data-dl data-dl-label><span data-dl-text>Download for Windows</span></a>
           </div>
 
           <div class="tier">
@@ -2218,10 +2262,8 @@
             subscription, no OpenAI account, nothing stored.
           </p>
           <div class="cta-row">
-            <a
-              class="btn btn-primary"
-              href="/download"
-              >Download for Windows</a
+            <a class="btn btn-primary" href="/download/win" data-dl data-dl-label
+              ><span data-dl-text>Download for Windows</span></a
             >
             <a class="btn btn-ghost" href="mailto:mytresh1984@outlook.com?subject=SAGE%20source%20licensing"
               >Licence the source</a
@@ -2403,11 +2445,13 @@
           releases: {
             title: 'Releases',
             html:
-              '<p>SAGE is <b>Windows 10 and 11</b>, about 95 MB. It updates itself: it looks ' +
-              'for a new version at start-up, downloads it in the background, and installs it ' +
-              'the next time you close the app, never during a session.</p>' +
+              '<p>SAGE runs on <b>Windows 10 and 11</b> and on <b>macOS</b> (one universal ' +
+              'build for Apple Silicon and Intel). It updates itself: it looks for a new ' +
+              'version at start-up, downloads it in the background, and installs it the next ' +
+              'time you close the app, never during a session.</p>' +
               '<div class="row">' +
-              '<a class="primary" href="/download">Download</a>' +
+              '<a class="primary" href="/download/win">Windows</a>' +
+              '<a class="primary" href="/download/mac">macOS</a>' +
               '</div>'
           },
           contact: {
@@ -2626,6 +2670,51 @@
           if (document.hidden) stop()
           else if (visible && !running) play()
         })
+      })()
+    </script>
+
+    <script>
+      /**
+       * Offer the build that matches the machine asking.
+       *
+       * The markup ships Windows, so a visitor with no JavaScript still gets a
+       * working download rather than a chooser that never resolves. This only
+       * ever swaps it for a Mac.
+       *
+       * Detection is deliberately narrow. `userAgentData.platform` is the
+       * modern answer and Chromium-only; `userAgent` is the fallback everything
+       * else understands. iPhones and iPads match "Mac" in some of these
+       * strings and cannot run either build, so they are excluded explicitly
+       * and left on the Windows link, which at least explains itself.
+       *
+       * The alternate link is always visible either way. Detection is a guess,
+       * and a guess must never be the only route to the other file.
+       */
+      ;(function () {
+        var ua = navigator.userAgent || ''
+        var platform = (navigator.userAgentData && navigator.userAgentData.platform) || ''
+        var touch = navigator.maxTouchPoints || 0
+
+        // iPadOS reports itself as a Mac and has a touch screen; a real Mac
+        // has neither a touch screen nor "iPhone" in its user agent.
+        var isTouchApple = /iPhone|iPad|iPod/.test(ua) || (/Mac/.test(ua) && touch > 1)
+        var isMac = !isTouchApple && (platform === 'macOS' || /Mac OS X|Macintosh/.test(ua))
+
+        if (!isMac) return
+
+        Array.prototype.forEach.call(document.querySelectorAll('[data-dl]'), function (el) {
+          el.setAttribute('href', '/download/mac')
+          var label = el.querySelector('[data-dl-text]')
+          if (label) label.textContent = 'Download for macOS'
+        })
+
+        Array.prototype.forEach.call(document.querySelectorAll('[data-dl-other]'), function (el) {
+          el.setAttribute('href', '/download/win')
+          el.textContent = 'Also available for Windows'
+        })
+
+        var note = document.getElementById('mac-note')
+        if (note) note.hidden = false
       })()
     </script>
 

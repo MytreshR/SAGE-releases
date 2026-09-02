@@ -30,6 +30,16 @@
       "source": "/download",
       "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.2.0-setup.exe",
       "permanent": false
+    },
+    {
+      "source": "/download/win",
+      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.2.0-setup.exe",
+      "permanent": false
+    },
+    {
+      "source": "/download/mac",
+      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.2.0-universal.dmg",
+      "permanent": false
     }
   ]
 }
