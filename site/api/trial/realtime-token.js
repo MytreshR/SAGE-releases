@@ -32,7 +32,18 @@ export default async function handler(req, res) {
         type: 'transcription',
         audio: {
           input: {
-            transcription: { model: process.env.SAGE_TRANSCRIBE_MODEL || 'gpt-live-transcribe' }
+            // Must match DEFAULT_TRANSCRIBE_MODEL in the app's
+            // realtimeTranscriber.ts, and the app is where the reasoning
+            // lives: gpt-live-transcribe rejects turn_detection outright, so
+            // turns would have to be committed by hand with local voice
+            // detection - the exact thing server VAD exists to avoid.
+            //
+            // This defaulted to gpt-live-transcribe while the app documented
+            // at length why that model is not used. The client sends its own
+            // model in session.update and so mostly won overall, but minting
+            // the session against a model that refuses the app's turn settings
+            // is not a disagreement worth leaving in place.
+            transcription: { model: process.env.SAGE_TRANSCRIBE_MODEL || 'gpt-4o-transcribe' }
           }
         }
       }
