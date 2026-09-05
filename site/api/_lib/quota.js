@@ -154,8 +154,14 @@ export async function requireQuota(req, res) {
     return null
   }
 
-  const account = await accountFor(req, body, deviceId)
-  const held = await licence.getLicence(deviceId)
+  // Both are store round trips and neither needs the other's answer, so they
+  // go together. This runs on the front of EVERY answer, before a single token
+  // has been asked for - it is latency the user experiences as the model being
+  // slow to think, and it was being paid twice over.
+  const [account, held] = await Promise.all([
+    accountFor(req, body, deviceId),
+    licence.getLicence(deviceId)
+  ])
 
   // Which OpenAI key funds this. An account and a licence are both revenue -
   // somebody paid - so they draw on the licensed key; only the trial is the
