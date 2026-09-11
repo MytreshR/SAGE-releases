@@ -17,7 +17,7 @@
  *             retrospective - it has been counting since the first release
  *             whether or not anyone was watching.
  *
- *   The site   /api/account/stats, behind SAGE_ADMIN_TOKEN. Trials, accounts,
+ *   The site  /api/account/stats, behind SAGE_ADMIN_TOKEN. Trials, accounts,
  *             hours and sales, all read live out of the store.
  *
  * Runs without the token and reports downloads alone, which is better than
@@ -59,8 +59,8 @@ function downloads() {
   for (const r of releases) {
     for (const a of r.assets) {
       // The installers people actually run. Blockmaps and update manifests are
-      // downloaded by the updater on a schedule, so counting them would
-      // measure how many copies are installed, not how many were taken.
+      // fetched by the updater on a schedule, so counting them would measure
+      // how many copies are installed, not how many were taken.
       if (!/setup\.exe$|\.dmg$/.test(a.name)) continue
       const platform = a.name.endsWith('.dmg') ? 'macOS' : 'Windows'
       if (platform === 'macOS') mac += a.download_count
@@ -69,29 +69,55 @@ function downloads() {
         tag: r.tag_name,
         published: r.published_at.slice(0, 10),
         platform,
-        file: a.name,
         count: a.download_count
       })
     }
   }
 
-  perAsset.sort((a, b) => b.published.localeCompare(a.published) || a.platform.localeCompare(b.platform))
+  perAsset.sort(
+    (a, b) => b.published.localeCompare(a.published) || a.platform.localeCompare(b.platform)
+  )
   return { perAsset, windows, mac, total: windows + mac }
 }
 
 // -------------------------------------------------------------------- store
 
+/** Why the store figures are missing, said precisely enough to act on. */
+let skipped = ''
+
 async function siteStats() {
-  if (!ADMIN) return null
-  const res = await fetch(`${SITE}/api/account/stats`, { headers: { 'x-sage-admin': ADMIN } })
+  if (!ADMIN) {
+    skipped = 'SAGE_ADMIN_TOKEN is not set in this shell.'
+    return null
+  }
+
+  let res
+  try {
+    res = await fetch(`${SITE}/api/account/stats`, { headers: { 'x-sage-admin': ADMIN } })
+  } catch (error) {
+    skipped = `Could not reach ${SITE} (${error.message}).`
+    return null
+  }
+
+  // The endpoint answers 404 both when the secret is unset on the server and
+  // when it does not match, deliberately - a stranger must not be able to tell
+  // that it exists at all. Right for them, unhelpful here, so the likely
+  // causes are named rather than left to be guessed between.
   if (res.status === 404) {
-    console.error('The site refused the admin token. Is SAGE_ADMIN_TOKEN set on Vercel, and the same value here?')
+    skipped = [
+      'The site refused the token (404). Either SAGE_ADMIN_TOKEN is not set on Vercel, or it is',
+      'set but the deployment predates it - Vercel binds environment variables at BUILD time, so',
+      'saving one changes nothing until the next deploy. Redeploy, then run this again. If it',
+      'still refuses, the value on Vercel and the value in this shell are not the same.'
+    ].join(' ')
     return null
   }
+
   if (!res.ok) {
-    console.error(`stats endpoint returned ${res.status}`)
+    skipped = `The stats endpoint returned ${res.status}.`
     return null
   }
+
   return res.json()
 }
 
@@ -127,7 +153,7 @@ if (site) {
     ['Sales', 'Test purchases (not counted above)', site.sales.testPurchases]
   )
 } else {
-  summary.push(['', '', ''], ['Note', 'Store figures unavailable', 'Set SAGE_ADMIN_TOKEN to include trials, accounts, hours and sales'])
+  summary.push(['', '', ''], ['Note', 'Store figures unavailable', skipped])
 }
 
 summary.push(['', '', ''], ['Downloads by release', '', ''], ['Tag', 'Platform', 'Downloads'])
@@ -158,7 +184,8 @@ if (site) {
       `   paid ${site.sales.count}   revenue ${money(site.sales.revenueMinorUnits, site.sales.currency)}`
   )
 } else {
-  console.log('Store figures skipped - SAGE_ADMIN_TOKEN is not set.')
+  console.log('\nStore figures skipped.')
+  console.log('  ' + skipped)
 }
 console.log(`\nWrote ${summaryFile}`)
-console.log(`Wrote ${dailyFile}${daily.length === 1 ? '  (empty without the admin token)' : ''}`)
+console.log(`Wrote ${dailyFile}${daily.length === 1 ? '  (empty without the store figures)' : ''}`)
