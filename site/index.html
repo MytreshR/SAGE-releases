@@ -11,7 +11,7 @@
     <title>SAGE — answers, while they're still asking</title>
     <meta
       name="description"
-      content="SAGE listens to your interview, works out when a question has been asked, and puts an answer on screen you can say out loud. Hidden from screen sharing."
+      content="SAGE listens to your interview, works out when a question has been asked, and puts an answer on screen you can say out loud. Hidden from screen sharing on Windows."
     />
     <meta property="og:title" content="SAGE Speech Answer Generation Engine" />
     <meta
@@ -873,19 +873,105 @@
         margin: 0.25rem 0 1.2rem;
       }
 
-      /* ---------- callout ---------- */
-      .note {
-        border: 1px solid rgba(251, 191, 36, 0.26);
-        background: rgba(251, 191, 36, 0.055);
-        border-radius: 13px;
-        padding: 1.15rem 1.35rem;
+      /* ---------- installing ---------- */
+      .install {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.1rem;
+        margin-top: 2rem;
+      }
+
+      .install-col {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 1.5rem 1.6rem;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .install-col h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-size: 0.98rem;
+        letter-spacing: -0.01em;
+        margin-bottom: 1.1rem;
+        color: var(--text);
+        font-weight: 650;
+      }
+
+      /* The platform name carries the whole heading, so it gets the colour and
+         the rest of the line stays quiet. */
+      .os-tag {
+        background: var(--grad);
+        color: #fff;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+
+      .install-col ol {
+        margin: 0;
+        padding-left: 1.15rem;
+        color: var(--muted);
         font-size: 0.9rem;
-        color: #e6dcc4;
+        line-height: 1.65;
+      }
+
+      .install-col li {
+        margin-bottom: 0.85rem;
+        padding-left: 0.25rem;
+      }
+
+      .install-col li:last-child {
+        margin-bottom: 0;
+      }
+
+      .install-col li::marker {
+        color: var(--sky);
+        font-weight: 700;
+      }
+
+      .install-col b {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      /* ---------- callout ----------
+
+         Amber, and pale cream text, both left over from the dark theme. On
+         white the text was barely there, which is how it was reported.
+
+         Wrong twice over, because amber is the colour of a warning and this is
+         the most reassuring paragraph on the page: no card, no sign-up, nothing
+         renews. It was styling good news as a caution and then hiding it.
+
+         Now it reads as what it is. Sky, like everything else here, with a rule
+         down the left so it still registers as set apart from the body copy
+         without needing a colour to shout. */
+      .note {
+        position: relative;
+        border: 1px solid var(--line);
+        border-left: 3px solid var(--sky);
+        background: linear-gradient(180deg, rgba(14, 165, 233, 0.05), rgba(14, 165, 233, 0.02));
+        border-radius: 13px;
+        padding: 1.2rem 1.4rem;
+        font-size: 0.92rem;
+        line-height: 1.7;
+        /* --muted, not --dim. This is a paragraph to be read, not a caption to
+           be skimmed past, and it carries the answer to "what will this cost
+           me" - the question most likely to stop somebody downloading. */
+        color: var(--muted);
         margin-top: 1.6rem;
+        box-shadow: var(--shadow-sm);
       }
 
       .note b {
-        color: #fcd34d;
+        color: var(--text);
+        font-weight: 650;
       }
 
       /* ---------- licence tiers ---------- */
@@ -1184,6 +1270,22 @@
         .no-see {
           animation: none;
         }
+      }
+
+      /* The claim in that panel is true on one platform, and the panel is a
+         picture of the claim. Saying which keeps the image honest without
+         turning it into a footnote. */
+      .screen-os {
+        display: inline-block;
+        margin-top: 0.7rem;
+        padding: 0.16rem 0.55rem;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #8b8aa0;
       }
 
       .screen-empty {
@@ -1617,6 +1719,7 @@
           <a href="#how">How it works</a>
           <a href="#features">Features</a>
           <a href="#setup">Setup</a>
+          <a href="#install">Install</a>
           <a href="#faq">FAQ</a>
           <a href="#pricing">Pricing</a>
         </nav>
@@ -1651,8 +1754,8 @@
         </h1>
         <p class="sub">
           SAGE listens to your interview, works out when a question has actually been asked, and
-          hands you an answer you can say out loud — grounded in your own resume, and invisible to
-          screen sharing.
+          hands you an answer you can say out loud — grounded in your own resume, and hidden from
+          screen sharing on Windows.
         </p>
         <!-- NOTE: the download href below names the release asset exactly.
              Bump it on every release or the button 404s. -->
@@ -1846,7 +1949,7 @@
           </div>
 
           <div class="demo-foot">
-            <span><b>Hidden</b> from screen sharing</span>
+            <span><b>Hidden</b> from screen sharing on Windows</span>
             <span><b>~0.7s</b> to the first word</span>
             <span><b>Your resume</b>, not a generic answer</span>
           </div>
@@ -1925,8 +2028,14 @@
           <p class="eyebrow">Screen sharing</p>
           <h2>On your screen. Not on theirs.</h2>
           <p class="lead">
-            The window is excluded from screen capture at the OS level, so it does not appear in
-            Zoom, Teams or Meet — and it stays out of the taskbar and Alt-Tab.
+            On Windows the window is excluded from screen capture at the operating system level, so
+            it does not appear in Zoom, Teams or Meet — and it stays out of the taskbar and Alt-Tab.
+          </p>
+          <p class="lead" style="margin-top: 0.9rem">
+            <b>On macOS 15 and later it does appear.</b> Apple removed the mechanism that made this
+            possible, and says there is no public replacement, so we would rather tell you here than
+            let you discover it in an interview.
+            <a href="#faq">More in the FAQ</a>.
           </p>
         </div>
 
@@ -1962,7 +2071,8 @@
                      the other side receives, and there is nothing in it. -->
                 <span class="no-see" role="img" aria-label="See-no-evil monkey">🙈</span>
                 Nothing.<br />
-                The window is not in the captured frame.
+                The window is not in the captured frame.<br />
+                <span class="screen-os">Windows</span>
               </p>
             </div>
             <div class="screen-cap">
@@ -2208,6 +2318,62 @@
 
       </section>
 
+      <!-- installing -->
+      <section id="install" class="wrap">
+        <div class="reveal">
+          <p class="eyebrow">Installing</p>
+          <h2>Downloaded. Now what?</h2>
+          <p class="lead">
+            Both builds are unsigned, so both operating systems will warn you once. That is about
+            who signed the file, not what is in it &mdash; here is the way past on each.
+          </p>
+        </div>
+
+        <div class="install reveal">
+          <div class="install-col">
+            <h3><span class="os-tag">Windows</span> 10 and 11</h3>
+            <ol>
+              <li>Run <b>sage-setup.exe</b> from your downloads.</li>
+              <li>
+                SmartScreen says <i>&ldquo;Windows protected your PC&rdquo;</i> and names the
+                publisher as unknown. Click <b>More info</b>, then <b>Run anyway</b>. The Run anyway
+                button only appears after More info, which is what makes this step easy to miss.
+              </li>
+              <li>Let the installer finish. SAGE opens on its own.</li>
+              <li>Allow microphone access when Windows asks.</li>
+            </ol>
+          </div>
+
+          <div class="install-col">
+            <h3><span class="os-tag">macOS</span> Apple Silicon and Intel</h3>
+            <ol>
+              <li>Open the <b>.dmg</b> and drag SAGE into Applications.</li>
+              <li>
+                <b>Do not double-click it.</b> Gatekeeper will say the developer cannot be verified
+                and offer only a Cancel button, which looks like the file is broken.
+              </li>
+              <li>
+                Instead, <b>right-click SAGE in Applications and choose Open</b>, then confirm.
+                Right-clicking is what turns that dead end into a choice. First launch only.
+              </li>
+              <li>
+                Allow the microphone when macOS asks. If you want SAGE to hear the call rather than
+                the room, also allow <b>Screen Recording</b> in System Settings &rarr; Privacy
+                &amp; Security, then restart it.
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <p class="note" style="margin-top: 1.5rem">
+          <b>Stuck?</b> Nothing above should take more than a minute. If the app will not open, or
+          it opens and hears nothing,
+          <a href="mailto:mytresh1984@outlook.com?subject=SAGE%20-%20install%20trouble">email us</a>
+          and say which operating system you are on &mdash; that is usually enough to answer it in
+          one reply.
+        </p>
+      </section>
+
       <!-- faq -->
       <section id="faq" class="wrap">
         <div class="reveal">
@@ -2219,10 +2385,19 @@
           <details>
             <summary>Is there a Mac or Linux version?</summary>
             <p>
-              Not yet &mdash; version 1.0 is Windows 10/11 only. The app is built on Electron, so
-              macOS and Linux builds are possible; they are not released because they have not been
-              tested properly, and shipping an untested build of something you rely on mid-interview
-              is worse than shipping nothing.
+              <b>macOS, yes.</b> One universal build runs on both Apple Silicon and Intel &mdash;
+              there is nothing to choose between. Windows 10 and 11 are supported as they always
+              were.
+            </p>
+            <p>
+              Linux is not released. It is possible, and it is not shipped, because it has not been
+              tested properly &mdash; and an untested build of something you are relying on
+              mid-interview is worse than no build at all.
+            </p>
+            <p>
+              One difference worth knowing before you choose: the window is hidden from screen
+              sharing on Windows, and on recent macOS it is not. See
+              <b>Can the interviewer see it?</b> below.
             </p>
           </details>
 
@@ -2240,30 +2415,55 @@
           <details>
             <summary>Can the interviewer see it?</summary>
             <p>
-              The window is excluded from screen capture, so it does not appear when you share your
-              screen in Zoom, Teams or Google Meet, and it stays out of the taskbar and Alt-Tab.
-              It cannot hide a second monitor, your eyes, or a proctoring tool that photographs your
-              room &mdash; and some processes prohibit outside assistance entirely. Use it in line
-              with the rules of whatever you are taking part in.
+              <b>On Windows, no.</b> The window is excluded from screen capture at the operating
+              system level, so it does not appear when you share your screen in Zoom, Teams or
+              Google Meet, and it stays out of the taskbar and Alt-Tab.
+            </p>
+            <p>
+              <b>On macOS 15 (Sequoia) and later, assume it can be seen.</b> Apple changed how
+              screen recording works: every window is composited together before capture, and the
+              setting that used to exclude an app is ignored. Apple has said there is no public way
+              for an application to hide itself. That is not a limitation we can engineer around,
+              so we would rather say it plainly than let you find out during an interview. On
+              earlier macOS the older mechanism still applies.
+            </p>
+            <p>
+              It has never been able to hide a second monitor, your eyes, or a proctoring tool that
+              photographs your room &mdash; and some processes prohibit outside assistance
+              entirely. Use it in line with the rules of whatever you are taking part in.
             </p>
           </details>
 
           <details>
             <summary>Where does my data go?</summary>
             <p>
-              Audio is streamed to OpenAI for transcription and never stored by SAGE. Your API key
-              is encrypted at rest on your own machine, and session logs stay in a local folder. No
+              Audio is streamed to OpenAI for transcription and never stored by SAGE. There is no
+              API key of yours involved &mdash; transcription and answers run on our account, so
+              there is nothing of that kind to keep. Session logs stay in a local folder. No
               account, no server, no analytics &mdash; there is nowhere for it to be sent, because
               there is no backend.
             </p>
           </details>
 
           <details>
-            <summary>Why does Windows warn me when I install it?</summary>
+            <summary>Why does my computer warn me when I install it?</summary>
             <p>
-              The installer is not code-signed yet, so Windows SmartScreen flags the publisher as
-              unknown. Choose <b>More info &rarr; Run anyway</b>. A signing certificate is on the
-              list; until then the warning is expected rather than a sign of anything wrong.
+              Because the app is not code-signed yet. A signing certificate costs money annually on
+              each platform and is on the list; until then both operating systems treat an unknown
+              publisher exactly as they should.
+            </p>
+            <p>
+              <b>Windows:</b> SmartScreen says the publisher is unknown. Choose
+              <b>More info &rarr; Run anyway</b>.
+            </p>
+            <p>
+              <b>macOS:</b> Gatekeeper says the developer cannot be verified, and double-clicking
+              offers no way past it. <b>Right-click the app and choose Open</b> instead, then
+              confirm. You only do this the first time.
+            </p>
+            <p>
+              The warning is about who signed the file, not about what is in it. Full steps are in
+              <a href="#install">Installing</a>.
             </p>
           </details>
 
@@ -2564,19 +2764,29 @@
         color: var(--text);
       }
       #sheet-body .row a.primary { background: var(--sky); border-color: var(--sky); color: #fff; }
+      /* Also left over from the dark theme: grey on what is now a white card,
+         hovering to near-white - so the close button faded out at exactly the
+         moment the pointer was on it. */
       #sheet-close {
         position: absolute;
         top: 0.8rem;
         right: 0.9rem;
         background: none;
         border: 0;
-        color: #9a9aa5;
+        color: var(--dim);
         font-size: 1.4rem;
         line-height: 1;
         cursor: pointer;
         padding: 0.2rem 0.4rem;
+        border-radius: 8px;
+        transition:
+          color 0.15s ease,
+          background 0.15s ease;
       }
-      #sheet-close:hover { color: #f2f2f5; }
+      #sheet-close:hover {
+        color: var(--text);
+        background: var(--panel-2);
+      }
     </style>
 
     <script>

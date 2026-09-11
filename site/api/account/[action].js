@@ -1,4 +1,5 @@
 import { remainingMs, signOutEverywhere } from '../_lib/accounts.js'
+import { getMany, scan } from '../_lib/store.js'
 import { PACKS, packFor } from '../_lib/packs.js'
 import {
   accountFor,
@@ -31,6 +32,10 @@ export default async function handler(req, res) {
   if (action === 'logout') {
     if (req.method !== 'POST') return json(res, 405, { error: 'method-not-allowed' })
     return logout(req, res)
+  }
+  if (action === 'stats') {
+    if (req.method !== 'GET') return json(res, 405, { error: 'method-not-allowed' })
+    return stats(req, res)
   }
   return json(res, 404, { error: 'unknown-action' })
 }
@@ -169,4 +174,105 @@ async function logout(req, res) {
 
   clearCookie(res, SESSION_COOKIE)
   return json(res, 200, { ok: true })
+}
+
+/**
+ * GET /api/account/stats  ->  counts for the reporting spreadsheet
+ *
+ * Lives here rather than in its own file because Vercel's Hobby plan counts
+ * twelve serverless functions per deployment and eleven are already spoken
+ * for. A reporting endpoint is not worth the last slot.
+ *
+ * Behind a shared secret, not a user session. It answers questions about
+ * everybody - how many people have SAGE, how many have paid - and the person
+ * asking is the operator, not a customer. Absent secret means absent endpoint:
+ * it 404s rather than 401s, so a scanner learns nothing about what is here.
+ */
+async function stats(req, res) {
+  const expected = process.env.SAGE_ADMIN_TOKEN
+  const given = req.headers['x-sage-admin']
+  if (!expected || given !== expected) return json(res, 404, { error: 'unknown-action' })
+
+  const day = (ms) => new Date(ms).toISOString().slice(0, 10)
+  const now = Date.now()
+  const DAY = 86_400_000
+
+  // Machines that have ever launched SAGE. One row per device, created the
+  // first time it asked for a trial - so this is installs that actually ran,
+  // which is a truer number than downloads.
+  const trials = await scan('sage:trial:*', 20_000)
+  const trialKeys = trials.keys.filter((k) => !k.startsWith('sage:trial:issued:'))
+
+  // The daily counter the trial cap already maintains. Free time series - it
+  // has been recording since the cap was added, with no reporting in mind.
+  const issued = await scan('sage:trial:issued:*', 400)
+  const issuedValues = await getMany(issued.keys)
+  const newTrialsByDay = {}
+  issued.keys.forEach((k, i) => {
+    newTrialsByDay[k.replace('sage:trial:issued:', '')] = issuedValues[i] ?? 0
+  })
+
+  // Accounts. Small enough to read in full today; capped so that stays true.
+  const accounts = await scan('sage:acct:*', 5_000)
+  const records = (await getMany(accounts.keys)).filter(Boolean)
+
+  let withHours = 0
+  let everBought = 0
+  let grantedMs = 0
+  let usedMs = 0
+  let active7 = 0
+  let active30 = 0
+  let signedInDevices = 0
+  for (const a of records) {
+    if (remainingMs(a) > 0) withHours++
+    if ((a.grantedMs || 0) > 0) everBought++
+    grantedMs += a.grantedMs || 0
+    usedMs += a.usedMs || 0
+    if (a.lastSeenAt && now - a.lastSeenAt < 7 * DAY) active7++
+    if (a.lastSeenAt && now - a.lastSeenAt < 30 * DAY) active30++
+    if (a.activeDevice) signedInDevices++
+  }
+
+  // Sales, by serial, which is the record the webhook files for support.
+  const sales = await scan('sage:sale:*', 5_000)
+  const saleRecords = (await getMany(sales.keys)).filter(Boolean)
+  const paid = saleRecords.filter((o) => o.livemode)
+  const revenue = paid.reduce((sum, o) => sum + (o.amount || 0), 0)
+
+  return json(res, 200, {
+    generatedAt: new Date().toISOString(),
+    installs: {
+      // Devices that ran SAGE far enough to claim a trial.
+      machinesEverRun: trialKeys.length,
+      truncated: trials.truncated
+    },
+    newTrialsByDay,
+    accounts: {
+      total: records.length,
+      everBought,
+      withHoursNow: withHours,
+      signedInOnADevice: signedInDevices,
+      activeLast7Days: active7,
+      activeLast30Days: active30,
+      truncated: accounts.truncated
+    },
+    hours: {
+      bought: +(grantedMs / 3_600_000).toFixed(2),
+      used: +(usedMs / 3_600_000).toFixed(2),
+      remaining: +((grantedMs - usedMs) / 3_600_000).toFixed(2)
+    },
+    sales: {
+      // Sandbox purchases are excluded: they mint nothing and cost nothing,
+      // and counting them would overstate every number that matters.
+      count: paid.length,
+      testPurchases: saleRecords.length - paid.length,
+      revenueMinorUnits: revenue,
+      currency: paid[0]?.currency ?? 'usd',
+      byDay: paid.reduce((acc, o) => {
+        const d = day(Date.parse(o.paidAt));
+        acc[d] = (acc[d] || 0) + 1
+        return acc
+      }, {})
+    }
+  })
 }

@@ -4,3 +4,8 @@ The application source lives in a separate private repository.
 *.dmg
 *.AppImage
 *.deb
+
+# Reports written by tools/stats.mjs. Regenerate rather than commit:
+# they are a snapshot of a moment and stale the day after.
+sage-summary-*.csv
+sage-daily-*.csv

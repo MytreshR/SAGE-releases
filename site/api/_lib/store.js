@@ -68,6 +68,61 @@ export async function incr(key) {
 }
 
 /**
+ * Every key matching a pattern.
+ *
+ * SCAN rather than KEYS, which blocks the server for as long as it takes to
+ * walk the whole space - fine on a laptop, a stall for every live session on a
+ * shared instance.
+ *
+ * Bounded by `limit` because this exists for reporting, and a report is worth
+ * far less than the sessions it would delay. Past the ceiling it stops and says
+ * so, rather than walking a million keys to produce a number nobody needed to
+ * be exact.
+ */
+export async function scan(pattern, limit = 5000) {
+  // The dev fallback only ever sees prefix patterns like "sage:acct:*", so a
+  // prefix match is the whole of what it needs and avoids escaping a glob into
+  // a regular expression for no benefit.
+  if (!isPersistent) {
+    if (!pattern.endsWith('*')) {
+      return { keys: memory.has(pattern) ? [pattern] : [], truncated: false }
+    }
+    const prefix = pattern.slice(0, -1)
+    const keys = [...memory.keys()].filter((k) => k.startsWith(prefix))
+    return { keys: keys.slice(0, limit), truncated: keys.length > limit }
+  }
+
+  const keys = []
+  let cursor = '0'
+  do {
+    const [next, batch] = await command('SCAN', cursor, 'MATCH', pattern, 'COUNT', 1000)
+    cursor = String(next)
+    keys.push(...batch)
+    if (keys.length >= limit) return { keys: keys.slice(0, limit), truncated: true }
+  } while (cursor !== '0')
+
+  return { keys, truncated: false }
+}
+
+/**
+ * Several keys at once. One round trip instead of N, which is the difference
+ * between a report that returns and a report that times out.
+ */
+export async function getMany(keys) {
+  if (keys.length === 0) return []
+  if (!isPersistent) return keys.map((k) => memory.get(k) ?? null)
+
+  const out = []
+  // Chunked: a single MGET of thousands of keys is one enormous request body.
+  for (let i = 0; i < keys.length; i += 200) {
+    const chunk = keys.slice(i, i + 200)
+    const raw = await command('MGET', ...chunk)
+    out.push(...raw.map((v) => (v ? JSON.parse(v) : null)))
+  }
+  return out
+}
+
+/**
  * Create only if absent, reporting whether this call was the one that created
  * it. SETNX rather than GET-then-SET: two installers racing on the same
  * machine must not both be told they got a fresh trial.
