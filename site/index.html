@@ -344,6 +344,16 @@
         color: var(--text);
       }
 
+      /* Sits under the copyright rather than beside it: the two are different
+         claims - one is who owns the work, one is who builds it - and running
+         them together on one line reads as a single muddled sentence. */
+      .foot-org {
+        display: inline-block;
+        margin-top: 0.3rem;
+        color: var(--dim);
+        font-size: 0.85em;
+      }
+
       .nav-actions {
         display: flex;
         align-items: center;
@@ -2413,7 +2423,10 @@
 
     <footer>
       <div class="wrap foot">
-        <div>© 2026 Mytresh Ravi. All rights reserved.</div>
+        <div>
+          © 2026 Mytresh Ravi. All rights reserved.<br />
+          <span class="foot-org">A project by Sriven Technologies, LLC</span>
+        </div>
         <div style="display: flex; gap: 1.5rem; flex-wrap: wrap">
           <a href="/download" data-sheet="releases">Releases</a>
           <a href="/privacy.html">Privacy</a>
