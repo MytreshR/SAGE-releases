@@ -19,7 +19,22 @@ import { json } from '../_lib/trial.js'
  */
 export const config = { maxDuration: 60 }
 
-const ALLOWED_MODELS = (process.env.SAGE_TRIAL_MODELS || 'gpt-5.6-luna,gpt-5.6-sol')
+/**
+ * Both generations, on purpose.
+ *
+ * The app moved to the gpt-6 family in 1.4.0 - half the token price and a
+ * steadier time to first word - and this list did not move with it, so every
+ * answer came back "model-not-allowed" the moment a 1.4.0 client called.
+ *
+ * The 5.6 entries stay regardless of what the app ships today, because the
+ * allowlist is checked against whatever the CLIENT sends and there are v1.3.1
+ * installs in the wild that will keep sending gpt-5.6-luna for as long as they
+ * go un-updated. Dropping a model from here does not retire it; it breaks
+ * everyone still running it.
+ */
+const ALLOWED_MODELS = (
+  process.env.SAGE_TRIAL_MODELS || 'gpt-6-luna,gpt-6-sol,gpt-5.6-luna,gpt-5.6-sol'
+)
   .split(',')
   .map((m) => m.trim())
   .filter(Boolean)
