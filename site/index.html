@@ -481,6 +481,137 @@
         transform: translateY(-2px);
       }
 
+      /* ---------- rolling poster ----------
+         Sits between the header and the hero, full width, announcing the
+         sibling product. Deliberately a band rather than a card: a card here
+         competes with the hero for the same attention, where a band reads as
+         a notice above it and lets the hero stay the loudest thing. */
+      .poster {
+        display: block;
+        text-decoration: none;
+        color: #eaf6ff;
+        background: linear-gradient(100deg, #0b2545, #0c3a68 45%, #0369a1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+      }
+      .poster-inner {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 0.62rem 1.15rem;
+      }
+      .poster-new {
+        flex: none;
+        font-size: 0.66rem;
+        font-weight: 800;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+        padding: 0.2rem 0.5rem;
+        border-radius: 999px;
+        color: #04263f;
+        background: linear-gradient(180deg, #7dd3fc, #38bdf8);
+      }
+
+      /* The deck is one box; slides stack inside it and only one is opaque.
+         Height comes from the tallest slide via the grid, so the band never
+         changes height as it rotates - a strip that jumps every five seconds
+         pulls the eye off whatever is below it. */
+      .poster-deck {
+        flex: 1 1 auto;
+        display: grid;
+        min-width: 0;
+      }
+      .poster-slide {
+        grid-area: 1 / 1;
+        display: flex;
+        align-items: baseline;
+        gap: 0.55rem;
+        min-width: 0;
+        opacity: 0;
+        transform: translateY(0.4rem);
+        transition: opacity 0.45s ease, transform 0.45s ease;
+        pointer-events: none;
+      }
+      .poster-slide.is-on {
+        opacity: 1;
+        transform: none;
+      }
+      .poster-slide b {
+        font-size: 0.9rem;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .poster-slide em {
+        font-style: normal;
+        font-size: 0.86rem;
+        color: rgba(234, 246, 255, 0.76);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .poster-dots {
+        flex: none;
+        display: flex;
+        gap: 0.3rem;
+      }
+      .poster-dots i {
+        width: 0.34rem;
+        height: 0.34rem;
+        border-radius: 50%;
+        background: rgba(234, 246, 255, 0.32);
+        transition: background 0.3s ease, width 0.3s ease;
+      }
+      .poster-dots i.is-on {
+        width: 0.9rem;
+        border-radius: 999px;
+        background: #7dd3fc;
+      }
+
+      .poster-go {
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #bae6fd;
+      }
+      .poster:hover .poster-go {
+        color: #fff;
+      }
+      .poster-go svg {
+        transition: transform 0.25s ease;
+      }
+      .poster:hover .poster-go svg {
+        transform: translateX(3px);
+      }
+
+      @media (max-width: 46rem) {
+        .poster-slide em,
+        .poster-dots {
+          display: none;
+        }
+        .poster-inner {
+          gap: 0.6rem;
+        }
+      }
+      /* Motion is decoration here; the message is not. With it turned off the
+         slides cross-fade instantly rather than not rotating at all, so the
+         other three still get their turn. */
+      @media (prefers-reduced-motion: reduce) {
+        .poster-slide {
+          transition: none;
+          transform: none;
+        }
+        .poster-go svg,
+        .poster-dots i {
+          transition: none;
+        }
+      }
+
       /* ---------- hero ---------- */
       .hero {
         padding: 5.5rem 0 4rem;
@@ -1722,9 +1853,9 @@
           <a href="#install">Install</a>
           <a href="#faq">FAQ</a>
           <a href="#pricing">Pricing</a>
-          <!-- A separate page rather than a section: it is a tool, not a
-               description of one, and it runs on the visitor's own key so it
-               has nothing to do with the trial or the download. -->
+          <!-- The Next.js app at /resume-tailor, not a section here: it is a
+               separate product on its own basePath, running on the visitor's
+               own key, with nothing to do with the trial or the download. -->
           <a href="/resume-tailor">Resume Tailor</a>
         </nav>
         <div class="nav-actions">
@@ -1747,6 +1878,50 @@
         </div>
       </div>
     </header>
+
+    <!-- Rolling poster.
+         A sibling product, announced the way a shop announces one: a band
+         across the top that rotates through a few reasons to look, rather
+         than a paragraph buried halfway down a page about something else.
+         The whole band is one link - a strip carrying four separate pitches
+         and no obvious target is a strip people read and then ignore. -->
+    <a
+      class="poster"
+      href="/resume-tailor"
+      id="poster"
+      aria-label="New: SAGE Resume Tailor"
+    >
+      <span class="poster-inner">
+        <span class="poster-new">New</span>
+
+        <span class="poster-deck" id="poster-deck">
+          <span class="poster-slide is-on">
+            <b>SAGE Resume Tailor</b>
+            <em>Rewrite your resume for one job — without inventing a thing.</em>
+          </span>
+          <span class="poster-slide">
+            <b>Your ATS score, computed in code</b>
+            <em>Not graded by the model that wrote it. A paraphrase earns nothing.</em>
+          </span>
+          <span class="poster-slide">
+            <b>Bring your own OpenAI key</b>
+            <em>Key, resume and job description stay in your browser.</em>
+          </span>
+          <span class="poster-slide">
+            <b>Upload once, tailor per job</b>
+            <em>Then export a one or two page PDF, ready to send.</em>
+          </span>
+        </span>
+
+        <span class="poster-dots" id="poster-dots" aria-hidden="true"></span>
+        <span class="poster-go">
+          Try it
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        </span>
+      </span>
+    </a>
 
     <main id="top">
       <!-- hero -->
@@ -3176,6 +3351,67 @@
           .catch(function () {
             /* Offline, or the API is down. The sign-in link still works. */
           })
+      })()
+    </script>
+
+    <!-- Rolling poster -->
+    <script>
+      ;(function () {
+        var deck = document.getElementById('poster-deck')
+        var dotBox = document.getElementById('poster-dots')
+        var poster = document.getElementById('poster')
+        if (!deck || !poster) return
+
+        var slides = [].slice.call(deck.querySelectorAll('.poster-slide'))
+        if (slides.length < 2) return
+
+        // Dots are built here rather than written into the markup, so adding
+        // a slide above is the only edit needed to add one.
+        var dots = slides.map(function (_, i) {
+          var dot = document.createElement('i')
+          if (i === 0) dot.className = 'is-on'
+          if (dotBox) dotBox.appendChild(dot)
+          return dot
+        })
+
+        var at = 0
+        var timer = null
+        var HOLD = 5200
+
+        function show(next) {
+          slides[at].classList.remove('is-on')
+          dots[at] && dots[at].classList.remove('is-on')
+          at = (next + slides.length) % slides.length
+          slides[at].classList.add('is-on')
+          dots[at] && dots[at].classList.add('is-on')
+        }
+
+        function start() {
+          stop()
+          timer = setInterval(function () {
+            // A tab in the background still fires intervals, so a visitor
+            // returning after ten minutes would otherwise find the poster
+            // mid-sprint through a hundred slides it rotated to nobody.
+            if (!document.hidden) show(at + 1)
+          }, HOLD)
+        }
+        function stop() {
+          if (timer) clearInterval(timer)
+          timer = null
+        }
+
+        // Reading stops the clock. Someone who has stopped to read a line
+        // should not have it taken away mid-sentence, and someone tabbing
+        // through the page is reading it too.
+        poster.addEventListener('mouseenter', stop)
+        poster.addEventListener('mouseleave', start)
+        poster.addEventListener('focus', stop)
+        poster.addEventListener('blur', start)
+        document.addEventListener('visibilitychange', function () {
+          document.hidden ? stop() : start()
+        })
+
+        start()
       })()
     </script>
   </body>
