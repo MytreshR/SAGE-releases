@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Resume Tailor — SAGE</title>
+    <meta
+      name="description"
+      content="Rewrite your resume against a specific job description, using your own OpenAI key. Your key never leaves your browser, and nothing is invented that is not already on your resume."
+    />
+    <meta name="theme-color" content="#fbfdff" />
+    <link rel="canonical" href="https://www.sagemeeting-ai.xyz/resume-tailor.html" />
+    <link rel="stylesheet" href="/mark.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%235B4BE8'/%3E%3Cg fill='white'%3E%3Crect x='4.2' y='8.4' width='2.1' height='7.2' rx='1.05'/%3E%3Crect x='7.6' y='5.8' width='2.1' height='12.5' rx='1.05'/%3E%3Crect x='11' y='3.4' width='2.1' height='17.3' rx='1.05'/%3E%3Crect x='14.4' y='5.8' width='2.1' height='12.5' rx='1.05'/%3E%3Crect x='17.8' y='8.4' width='2.1' height='7.2' rx='1.05'/%3E%3C/g%3E%3C/svg%3E"
+    />
+    <style>
+      :root {
+        --bg: #fbfdff;
+        --bg-soft: #f1f7fe;
+        --panel: #ffffff;
+        --panel-2: #f4f9ff;
+        --line: rgba(12, 40, 74, 0.11);
+        --line-soft: rgba(12, 40, 74, 0.06);
+        --line-strong: rgba(12, 40, 74, 0.2);
+        --text: #0b2545;
+        --muted: #46607f;
+        --dim: #7b93ae;
+        --sky: #0ea5e9;
+        --sky-deep: #0369a1;
+        --indigo: #2563eb;
+        --good: #059669;
+        --warn: #b45309;
+        --bad: #b91c1c;
+        --grad-btn: linear-gradient(180deg, #0ea5e9, #0273b8);
+        --shadow-sm: 0 1px 2px rgba(12, 40, 74, 0.05), 0 4px 14px -6px rgba(12, 40, 74, 0.1);
+        --shadow-md: 0 2px 6px rgba(12, 40, 74, 0.06), 0 18px 44px -18px rgba(12, 40, 74, 0.22);
+        --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        background: radial-gradient(
+          55rem 34rem at 20% -12%,
+          rgba(14, 165, 233, 0.1),
+          transparent 60%
+        );
+      }
+      .wrap {
+        position: relative;
+        z-index: 1;
+        max-width: 60rem;
+        margin: 0 auto;
+        padding: 1.5rem 1.15rem 4rem;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.4rem 0 2rem;
+      }
+      .mark {
+        text-decoration: none;
+        color: inherit;
+      }
+      header a.back {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--muted);
+        text-decoration: none;
+      }
+      header a.back:hover {
+        color: var(--sky-deep);
+      }
+
+      h1 {
+        font-size: clamp(1.9rem, 4.5vw, 2.6rem);
+        line-height: 1.12;
+        letter-spacing: -0.02em;
+        font-weight: 800;
+      }
+      .lede {
+        margin-top: 0.7rem;
+        font-size: 1.04rem;
+        color: var(--muted);
+        max-width: 42rem;
+      }
+
+      /* The one claim worth making above everything else. It is also the
+         reason this page has no server behind it, so it is stated as fact
+         rather than as a promise. */
+      .trust {
+        margin-top: 1.4rem;
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+        padding: 0.9rem 1.05rem;
+        background: linear-gradient(180deg, #f0fdf4, #ecfdf5);
+        border: 1px solid rgba(5, 150, 105, 0.22);
+        border-radius: 12px;
+        font-size: 0.9rem;
+        color: #065f46;
+      }
+      .trust svg {
+        flex: none;
+        margin-top: 0.15rem;
+      }
+      .trust b {
+        font-weight: 700;
+      }
+
+      section.card {
+        margin-top: 1.5rem;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: var(--shadow-sm);
+        padding: 1.2rem 1.25rem 1.35rem;
+      }
+      .step {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--sky-deep);
+      }
+      .step i {
+        font-style: normal;
+        display: grid;
+        place-items: center;
+        width: 1.4rem;
+        height: 1.4rem;
+        border-radius: 50%;
+        background: var(--bg-soft);
+        border: 1px solid var(--line);
+        font-size: 0.72rem;
+      }
+      h2 {
+        margin-top: 0.55rem;
+        font-size: 1.12rem;
+        letter-spacing: -0.01em;
+      }
+      .hint {
+        margin-top: 0.3rem;
+        font-size: 0.86rem;
+        color: var(--muted);
+      }
+      .hint a {
+        color: var(--sky-deep);
+        font-weight: 600;
+      }
+
+      label.field {
+        display: block;
+        margin-top: 0.9rem;
+      }
+      input[type='password'],
+      input[type='text'],
+      textarea,
+      select {
+        width: 100%;
+        font-family: inherit;
+        font-size: 0.92rem;
+        color: var(--text);
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 0.65rem 0.8rem;
+        line-height: 1.55;
+      }
+      input:focus,
+      textarea:focus,
+      select:focus {
+        outline: 2px solid rgba(14, 165, 233, 0.35);
+        outline-offset: 1px;
+        border-color: var(--sky);
+        background: #fff;
+      }
+      textarea {
+        resize: vertical;
+        min-height: 9rem;
+        font-size: 0.88rem;
+      }
+      .key-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: stretch;
+      }
+      .key-row input {
+        font-family: var(--mono);
+        letter-spacing: 0.02em;
+      }
+      .ghost {
+        flex: none;
+        padding: 0 0.8rem;
+        font: inherit;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--muted);
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        cursor: pointer;
+      }
+      .ghost:hover {
+        color: var(--text);
+        border-color: var(--line-strong);
+      }
+      .check {
+        display: flex;
+        gap: 0.55rem;
+        align-items: flex-start;
+        margin-top: 0.7rem;
+        font-size: 0.85rem;
+        color: var(--muted);
+        cursor: pointer;
+      }
+      .check input {
+        margin-top: 0.28rem;
+        width: auto;
+        accent-color: var(--sky);
+      }
+
+      .rowline {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        align-items: center;
+        margin-top: 0.85rem;
+      }
+      .filebtn {
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.5rem 0.85rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--sky-deep);
+        background: var(--bg-soft);
+        border: 1px solid rgba(14, 165, 233, 0.3);
+        border-radius: 9px;
+        cursor: pointer;
+      }
+      .filebtn input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+      .filenote {
+        font-size: 0.82rem;
+        color: var(--dim);
+      }
+      .filenote.bad {
+        color: var(--bad);
+      }
+      .filenote.good {
+        color: var(--good);
+      }
+
+      .two {
+        display: grid;
+        gap: 0.8rem;
+        grid-template-columns: 1fr 1fr;
+      }
+      @media (max-width: 34rem) {
+        .two {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .go {
+        margin-top: 1.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+      }
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 1.5rem;
+        font: inherit;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #fff;
+        background: var(--grad-btn);
+        border: 0;
+        border-radius: 11px;
+        cursor: pointer;
+        box-shadow: var(--shadow-sm);
+      }
+      .btn-primary:hover:not(:disabled) {
+        filter: brightness(1.06);
+      }
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .status {
+        font-size: 0.87rem;
+        color: var(--muted);
+      }
+      .status.bad {
+        color: var(--bad);
+      }
+      .spin {
+        width: 0.95rem;
+        height: 0.95rem;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .spin {
+          animation: none;
+        }
+      }
+
+      #out-card {
+        display: none;
+      }
+      #out-card.on {
+        display: block;
+      }
+      .out-head {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.9rem;
+      }
+      .out-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .result {
+        font-size: 0.92rem;
+        line-height: 1.72;
+        word-wrap: break-word;
+      }
+      .result h1,
+      .result h2,
+      .result h3 {
+        margin: 1.3em 0 0.4em;
+        letter-spacing: -0.01em;
+        line-height: 1.3;
+      }
+      .result h1 {
+        font-size: 1.25rem;
+      }
+      .result h2 {
+        font-size: 1.05rem;
+        padding-bottom: 0.25em;
+        border-bottom: 1px solid var(--line-soft);
+      }
+      .result h3 {
+        font-size: 0.95rem;
+      }
+      .result > *:first-child {
+        margin-top: 0;
+      }
+      .result p {
+        margin: 0.55em 0;
+      }
+      .result ul {
+        margin: 0.5em 0;
+        padding-left: 1.2rem;
+      }
+      .result li {
+        margin: 0.3em 0;
+      }
+      .result hr {
+        border: 0;
+        border-top: 1px solid var(--line);
+        margin: 1.6em 0;
+      }
+      .result strong {
+        font-weight: 700;
+      }
+      .result em {
+        color: var(--muted);
+      }
+      .caret::after {
+        content: '';
+        display: inline-block;
+        width: 0.5em;
+        height: 1.05em;
+        margin-left: 0.1em;
+        vertical-align: -0.18em;
+        background: var(--sky);
+        animation: blink 1.1s steps(2, start) infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .caret::after {
+          animation: none;
+        }
+      }
+
+      footer {
+        margin-top: 3rem;
+        padding-top: 1.4rem;
+        border-top: 1px solid var(--line-soft);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem 1.2rem;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: var(--dim);
+      }
+      footer a {
+        color: var(--muted);
+        font-weight: 600;
+        text-decoration: none;
+      }
+      footer a:hover {
+        color: var(--sky-deep);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <header>
+        <a class="mark" href="/">
+          <span class="sage-mark">
+            <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+              <rect class="sage-bar" style="--i: 0" x="4.2" y="8.4" width="2.1" height="7.2" rx="1.05" />
+              <rect class="sage-bar" style="--i: 1" x="7.6" y="5.8" width="2.1" height="12.5" rx="1.05" />
+              <rect class="sage-bar" style="--i: 2" x="11" y="3.4" width="2.1" height="17.3" rx="1.05" />
+              <rect class="sage-bar" style="--i: 3" x="14.4" y="5.8" width="2.1" height="12.5" rx="1.05" />
+              <rect class="sage-bar" style="--i: 4" x="17.8" y="8.4" width="2.1" height="7.2" rx="1.05" />
+            </svg>
+            <span class="sage-word" aria-hidden="true">SAGE</span>
+          </span>
+        </a>
+        <a class="back" href="/">Back to SAGE</a>
+      </header>
+
+      <main>
+        <h1>Resume Tailor</h1>
+        <p class="lede">
+          Paste a job description and your resume comes back rewritten against it — the same
+          experience, led by the parts that job actually asks for. Runs on your own OpenAI key.
+        </p>
+
+        <div class="trust">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          <span>
+            <b>Your key never leaves this browser.</b> This page has no server behind it — it calls
+            OpenAI directly from your machine, so your key, your resume and the job description are
+            never sent to us and never stored anywhere we can reach.
+          </span>
+        </div>
+
+        <!-- 1 ─────────────────────────────────────────────────────────── -->
+        <section class="card">
+          <div class="step"><i>1</i> Your key</div>
+          <h2>OpenAI API key</h2>
+          <p class="hint">
+            Starts with <code>sk-</code>. Create one at
+            <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer"
+              >platform.openai.com/api-keys</a
+            >. One tailored resume costs well under a cent.
+          </p>
+
+          <label class="field">
+            <div class="key-row">
+              <input
+                id="key"
+                type="password"
+                placeholder="sk-..."
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <button class="ghost" id="key-toggle" type="button">Show</button>
+            </div>
+          </label>
+
+          <label class="check">
+            <input type="checkbox" id="key-remember" />
+            <span
+              >Remember it on this device. Stored in this browser only — clear it any time with the
+              button that appears here.</span
+            >
+          </label>
+        </section>
+
+        <!-- 2 ─────────────────────────────────────────────────────────── -->
+        <section class="card">
+          <div class="step"><i>2</i> Your resume</div>
+          <h2>What you have now</h2>
+          <p class="hint">
+            Paste it, or upload a PDF, TXT or Markdown file. Formatting is stripped either way —
+            what comes back is the wording, for you to put into your own template.
+          </p>
+
+          <div class="rowline">
+            <label class="filebtn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              Upload a file
+              <input type="file" id="resume-file" accept=".pdf,.txt,.md,.markdown,text/plain" />
+            </label>
+            <span class="filenote" id="resume-note"></span>
+          </div>
+
+          <label class="field">
+            <textarea
+              id="resume"
+              placeholder="Paste your resume here — all of it, including dates and numbers."
+              style="min-height: 13rem"
+            ></textarea>
+          </label>
+        </section>
+
+        <!-- 3 ─────────────────────────────────────────────────────────── -->
+        <section class="card">
+          <div class="step"><i>3</i> The job</div>
+          <h2>What they are asking for</h2>
+          <p class="hint">
+            The whole posting works better than a summary — the requirements buried at the bottom
+            are usually the ones being screened on.
+          </p>
+
+          <div class="two" style="margin-top: 0.9rem">
+            <input id="job-title" type="text" placeholder="Role title (optional)" />
+            <input id="job-company" type="text" placeholder="Company (optional)" />
+          </div>
+
+          <label class="field">
+            <textarea id="job" placeholder="Paste the job description here."></textarea>
+          </label>
+
+          <label class="field">
+            <select id="model" aria-label="Model">
+              <option value="gpt-6-luna">GPT-6 Luna — fast and cheap (recommended)</option>
+              <option value="gpt-6-sol">GPT-6 Sol — slower, more deliberate</option>
+              <option value="gpt-5.6-luna">GPT-5.6 Luna — if your key has no GPT-6 access</option>
+            </select>
+          </label>
+        </section>
+
+        <div class="go">
+          <button class="btn-primary" id="run" type="button">
+            <span id="run-label">Tailor my resume</span>
+          </button>
+          <span class="status" id="status"></span>
+        </div>
+
+        <!-- Output ───────────────────────────────────────────────────── -->
+        <section class="card" id="out-card">
+          <div class="out-head">
+            <div class="step" style="margin: 0"><i>✓</i> Result</div>
+            <div class="out-actions">
+              <button class="ghost" id="copy" type="button">Copy</button>
+              <button class="ghost" id="download" type="button">Download .md</button>
+            </div>
+          </div>
+          <div class="result" id="out"></div>
+        </section>
+      </main>
+
+      <footer>
+        <span>A project by Sriven Technologies, LLC</span>
+        <span>
+          <a href="/">SAGE</a> · <a href="/privacy.html">Privacy</a> ·
+          <a href="/account.html">Account</a>
+        </span>
+      </footer>
+    </div>
+
+    <script type="module">
+      const $ = (id) => document.getElementById(id)
+      const keyBox = $('key')
+      const remember = $('key-remember')
+      const status = $('status')
+      const runBtn = $('run')
+      const runLabel = $('run-label')
+      const outCard = $('out-card')
+      const out = $('out')
+
+      const STORE = 'sage.tailor.key'
+
+      /* ── the key ──────────────────────────────────────────────────────
+         localStorage, and only when asked for. A key pasted once and
+         silently kept is a key the user does not know is there, which is
+         the wrong default for a credential that can spend money. */
+      const saved = localStorage.getItem(STORE)
+      if (saved) {
+        keyBox.value = saved
+        remember.checked = true
+      }
+      remember.addEventListener('change', () => {
+        if (remember.checked && keyBox.value.trim()) {
+          localStorage.setItem(STORE, keyBox.value.trim())
+        } else {
+          localStorage.removeItem(STORE)
+        }
+      })
+      keyBox.addEventListener('input', () => {
+        if (remember.checked) localStorage.setItem(STORE, keyBox.value.trim())
+      })
+      $('key-toggle').addEventListener('click', () => {
+        const showing = keyBox.type === 'text'
+        keyBox.type = showing ? 'password' : 'text'
+        $('key-toggle').textContent = showing ? 'Show' : 'Hide'
+      })
+
+      /* ── reading a resume file ────────────────────────────────────────
+         PDF because that is what a resume actually is. pdf.js is loaded
+         only when a PDF is chosen, so nobody pasting text pays for a
+         megabyte of parser they never use. */
+      const note = $('resume-note')
+      const setNote = (text, kind) => {
+        note.textContent = text
+        note.className = 'filenote' + (kind ? ' ' + kind : '')
+      }
+
+      async function textFromPdf(file) {
+        const pdfjs = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs')
+        pdfjs.GlobalWorkerOptions.workerSrc =
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs'
+
+        const doc = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise
+        const pages = []
+        for (let n = 1; n <= doc.numPages; n++) {
+          const page = await doc.getPage(n)
+          const content = await page.getTextContent()
+
+          // Rebuild the lines. A PDF has no newlines - it has glyphs at
+          // coordinates - so items are grouped by their y position, or the
+          // whole resume arrives as one unbroken paragraph.
+          const lines = new Map()
+          for (const item of content.items) {
+            if (!item.str) continue
+            const y = Math.round(item.transform[5])
+            if (!lines.has(y)) lines.set(y, [])
+            lines.get(y).push(item.str)
+          }
+          const ordered = [...lines.entries()].sort((a, b) => b[0] - a[0])
+          pages.push(ordered.map(([, parts]) => parts.join(' ').replace(/\s+/g, ' ').trim()).join('\n'))
+        }
+        return pages.join('\n\n').trim()
+      }
+
+      $('resume-file').addEventListener('change', async (e) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+        setNote(`Reading ${file.name}…`)
+        try {
+          const text = /\.pdf$/i.test(file.name)
+            ? await textFromPdf(file)
+            : await file.text()
+
+          if (!text.trim()) {
+            setNote(
+              'That file had no text in it. A scanned or image-only PDF cannot be read — paste the text instead.',
+              'bad'
+            )
+            return
+          }
+          $('resume').value = text
+          setNote(`${file.name} — ${text.split(/\s+/).length} words. Check it read correctly.`, 'good')
+        } catch (err) {
+          setNote(`Could not read that file (${err.message}). Paste the text instead.`, 'bad')
+        }
+      })
+
+      /* ── the prompt ───────────────────────────────────────────────────
+         The whole product is in here. A tailoring tool that invents a
+         technology to match the posting writes a resume its owner cannot
+         defend in the interview it just won them - and SAGE's other half
+         is the thing sitting in that interview.
+
+         So: reorder, reword, re-emphasise, and say plainly what is
+         missing rather than filling the gap. */
+      const SYSTEM = `You rewrite a candidate's resume so it targets one specific job, using only what the resume already contains.
+
+WHAT YOU MAY DO
+- Reorder. Put the experience this job asks for first, within each role and across the resume.
+- Reword. Use the posting's own vocabulary where it honestly describes the same thing: if they say "observability" and the resume says "monitoring with Prometheus and Grafana", say observability.
+- Re-weight. Expand a bullet that matters to this job; compress or cut one that does not.
+- Sharpen. Lead each bullet with the outcome and the scale, where the resume gives them.
+- Rewrite the summary at the top so it reads as a candidate for THIS role.
+
+WHAT YOU MAY NEVER DO
+- Never add an employer, job title, date, degree, certification, client or team size that is not in the resume.
+- Never add a technology, tool or language the resume does not mention. Not even one the candidate has obviously used; if it is not written down, it is not yours to claim.
+- Never invent or inflate a number. No percentages, latencies, user counts or team sizes that are not already there. A metric the candidate cannot defend is worse than no metric.
+- Never stretch a date or leave a gap out to make a timeline look continuous.
+
+The test: every line must be something the candidate can be questioned on for ten minutes and stand behind, because they will be.
+
+OUTPUT
+Return the complete tailored resume in Markdown, ready to copy into a document. Keep the candidate's real section headings where they work. No preamble, no commentary, no notes about what you changed.
+
+Then a horizontal rule, and a final section exactly like this:
+
+## What this job asks for that your resume does not show
+
+A short list - three to six items - of requirements in the posting that the resume has no evidence for. One line each, plain and specific. If the resume genuinely covers everything, say so in one line instead.
+
+This section is the honest half of the job. Do not soften it, and do not pad it with things the resume does cover.`
+
+      /* ── markdown, only what this output uses ─────────────────────── */
+      const esc = (s) =>
+        s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      const inline = (s) =>
+        esc(s)
+          .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+          .replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>')
+          .replace(/`([^`]+)`/g, '<code>$1</code>')
+
+      function render(md) {
+        const lines = md.split('\n')
+        const html = []
+        let list = false
+        const closeList = () => {
+          if (list) {
+            html.push('</ul>')
+            list = false
+          }
+        }
+        for (const raw of lines) {
+          const line = raw.trimEnd()
+          const h = line.match(/^(#{1,4})\s+(.*)$/)
+          if (h) {
+            closeList()
+            const n = Math.min(h[1].length, 3)
+            html.push(`<h${n}>${inline(h[2])}</h${n}>`)
+            continue
+          }
+          if (/^\s*([-*+]|\d+\.)\s+/.test(line)) {
+            if (!list) {
+              html.push('<ul>')
+              list = true
+            }
+            html.push(`<li>${inline(line.replace(/^\s*([-*+]|\d+\.)\s+/, ''))}</li>`)
+            continue
+          }
+          if (/^\s*(---+|___+|\*\*\*+)\s*$/.test(line)) {
+            closeList()
+            html.push('<hr>')
+            continue
+          }
+          if (!line.trim()) {
+            closeList()
+            continue
+          }
+          closeList()
+          html.push(`<p>${inline(line)}</p>`)
+        }
+        closeList()
+        return html.join('\n')
+      }
+
+      /* ── running it ───────────────────────────────────────────────── */
+      let raw = ''
+      let busy = false
+
+      const fail = (msg) => {
+        status.textContent = msg
+        status.className = 'status bad'
+      }
+
+      /* The API's own message, turned into something actionable. A 401
+         under a resume tool reads as "this is broken"; it almost always
+         means one specific, fixable thing. */
+      function explain(res, body) {
+        const detail = body?.error?.message || ''
+        if (res.status === 401) return 'That key was refused. Check it is copied whole, and still active.'
+        if (res.status === 429 && /quota|billing/i.test(detail))
+          return 'That key has no credit on it. Add billing at platform.openai.com, then try again.'
+        if (res.status === 429) return 'Rate limited by OpenAI. Wait a few seconds and try again.'
+        if (res.status === 404 || /does not exist|do not have access/i.test(detail))
+          return 'Your key has no access to that model. Pick GPT-5.6 Luna in the dropdown above.'
+        return detail || `OpenAI returned ${res.status}.`
+      }
+
+      async function run() {
+        if (busy) return
+        const key = keyBox.value.trim()
+        const resume = $('resume').value.trim()
+        const job = $('job').value.trim()
+
+        if (!key) return fail('Add your OpenAI key first.')
+        if (!resume) return fail('Add your resume.')
+        if (!job) return fail('Add the job description.')
+
+        busy = true
+        runBtn.disabled = true
+        runLabel.textContent = 'Tailoring'
+        runBtn.insertAdjacentHTML('beforeend', '<span class="spin" id="sp"></span>')
+        status.textContent = ''
+        status.className = 'status'
+        raw = ''
+        out.innerHTML = ''
+        out.classList.add('caret')
+        outCard.classList.add('on')
+        outCard.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
+        const title = $('job-title').value.trim()
+        const company = $('job-company').value.trim()
+        const heading = [title, company].filter(Boolean).join(' at ')
+
+        try {
+          const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${key}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              model: $('model').value,
+              stream: true,
+              messages: [
+                { role: 'system', content: SYSTEM },
+                {
+                  role: 'user',
+                  content:
+                    (heading ? `THE ROLE: ${heading}\n\n` : '') +
+                    `THE JOB DESCRIPTION\n${job}\n\n` +
+                    `THE RESUME, WHICH IS THE ONLY SOURCE OF FACTS\n${resume}`
+                }
+              ]
+            })
+          })
+
+          if (!res.ok) {
+            const body = await res.json().catch(() => null)
+            throw new Error(explain(res, body))
+          }
+
+          const reader = res.body.getReader()
+          const decoder = new TextDecoder()
+          let buffer = ''
+
+          for (;;) {
+            const { done, value } = await reader.read()
+            if (done) break
+            buffer += decoder.decode(value, { stream: true })
+
+            // SSE frames are separated by a blank line, and a chunk can
+            // split one down the middle - so only whole frames are taken
+            // and the remainder stays in the buffer.
+            const frames = buffer.split('\n\n')
+            buffer = frames.pop() ?? ''
+
+            for (const frame of frames) {
+              const line = frame.split('\n').find((l) => l.startsWith('data: '))
+              if (!line) continue
+              const data = line.slice(6).trim()
+              if (data === '[DONE]') continue
+              try {
+                const delta = JSON.parse(data).choices?.[0]?.delta?.content
+                if (delta) {
+                  raw += delta
+                  out.innerHTML = render(raw)
+                }
+              } catch {
+                // A frame that is not JSON is not worth stopping for
+              }
+            }
+          }
+
+          if (!raw.trim()) throw new Error('The model returned nothing. Try again.')
+          status.textContent = 'Done. Read it before you send it.'
+        } catch (err) {
+          fail(err.message)
+          if (!raw.trim()) outCard.classList.remove('on')
+        } finally {
+          busy = false
+          runBtn.disabled = false
+          runLabel.textContent = 'Tailor my resume'
+          $('sp')?.remove()
+          out.classList.remove('caret')
+        }
+      }
+
+      runBtn.addEventListener('click', run)
+
+      /* ── taking it away ───────────────────────────────────────────── */
+      $('copy').addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(raw)
+          $('copy').textContent = 'Copied'
+          setTimeout(() => ($('copy').textContent = 'Copy'), 1400)
+        } catch {
+          $('copy').textContent = 'Press Ctrl+C'
+        }
+      })
+
+      $('download').addEventListener('click', () => {
+        const name =
+          [$('job-company').value.trim(), $('job-title').value.trim(), 'resume']
+            .filter(Boolean)
+            .join(' - ')
+            .replace(/[\\/:*?"<>|]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim() + '.md'
+        const url = URL.createObjectURL(new Blob([raw], { type: 'text/markdown' }))
+        const a = document.createElement('a')
+        a.href = url
+        a.download = name
+        a.click()
+        URL.revokeObjectURL(url)
+      })
+    </script>
+  </body>
+</html>
