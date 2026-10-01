@@ -41,17 +41,17 @@
     },
     {
       "source": "/download",
-      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.3.1-setup.exe",
+      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.4.0-setup.exe",
       "permanent": false
     },
     {
       "source": "/download/win",
-      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.3.1-setup.exe",
+      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.4.0-setup.exe",
       "permanent": false
     },
     {
       "source": "/download/mac",
-      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.3.1-universal.dmg",
+      "destination": "https://github.com/MytreshR/SAGE-releases/releases/download/v1.3.1/sage-1.3.1-universal.dmg",
       "permanent": false
     }
   ]
