@@ -53,6 +53,21 @@
       "source": "/download/mac",
       "destination": "https://github.com/MytreshR/SAGE-releases/releases/download/v1.3.1/sage-1.3.1-universal.dmg",
       "permanent": false
+    },
+    {
+      "source": "/download/byok",
+      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-byok-1.4.0-setup.exe",
+      "permanent": false
+    },
+    {
+      "source": "/download/byok/win",
+      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-byok-1.4.0-setup.exe",
+      "permanent": false
+    },
+    {
+      "source": "/download/byok/mac",
+      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-byok-1.4.0-universal.dmg",
+      "permanent": false
     }
   ]
 }

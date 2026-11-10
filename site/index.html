@@ -886,6 +886,95 @@
         }
       }
 
+      /* The leaf on the brand mark. Hidden until the season script says
+         otherwise, so it never shows in the wrong month. */
+      .season-leaf {
+        display: none;
+        margin-left: -0.3rem;
+        margin-top: -0.9rem;
+        transform: rotate(22deg);
+        animation: tg-drift 7s ease-in-out infinite;
+        --r: 22deg;
+      }
+      html.is-season .season-leaf {
+        display: inline-flex;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .season-leaf {
+          animation: none;
+        }
+      }
+
+      /* The second product, as a line under the hero buttons. */
+      .edition {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 0.2rem 0.5rem;
+        margin: 0.9rem 0 0;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .edition a {
+        color: var(--indigo);
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .edition a:hover {
+        text-decoration: underline;
+      }
+      .edition-sep {
+        color: var(--dim);
+      }
+      .edition-more {
+        margin-left: 0.4rem;
+        color: var(--dim) !important;
+        font-weight: 500 !important;
+      }
+
+      /* The bring-your-own-key panel under the price cards. */
+      .byok {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 2rem;
+        align-items: center;
+        max-width: 980px;
+        padding: 1.8rem 2rem;
+        border: 1px solid var(--line-soft);
+        border-radius: 16px;
+        background: var(--lift);
+        box-shadow: var(--shadow-sm);
+      }
+      .byok h3 {
+        margin: 0 0 0.6rem;
+        font-size: 1.15rem;
+        letter-spacing: -0.015em;
+      }
+      .byok-text p:last-child {
+        margin: 0;
+        font-size: 0.92rem;
+        color: var(--muted);
+      }
+      .byok-actions {
+        display: grid;
+        gap: 0.6rem;
+      }
+      .byok-actions .btn {
+        justify-content: center;
+      }
+      .byok-note {
+        text-align: center;
+        font-size: 0.78rem;
+        color: var(--dim);
+      }
+      @media (max-width: 760px) {
+        .byok {
+          grid-template-columns: 1fr;
+          padding: 1.4rem 1.2rem;
+        }
+      }
+
       /* ---------- hero ---------- */
       .hero {
         padding: 5.5rem 0 4rem;
@@ -2119,6 +2208,14 @@
             </svg>
             <span class="sage-word" aria-hidden="true"><i style="--i: 5">S</i><i style="--i: 6">A</i><i style="--i: 7">G</i><i style="--i: 8">E</i></span>
           </span>
+          <!-- A leaf on the mark from mid-November to the end of the month,
+               every year - the Thanksgiving and Black Friday stretch. Shown by
+               the season script at the end of the page, so without JS there is
+               no leaf rather than a leaf in March. The app's title bar wears
+               the same one on the same dates. -->
+          <span class="season-leaf" aria-hidden="true">
+            <svg width="13" height="13" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" fill="#fbbf24" /><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" fill="none" stroke="#7c2d12" stroke-width="1.6" stroke-linecap="round" /></svg>
+          </span>
         </a>
         <nav class="nav-links">
           <a href="#how">How it works</a>
@@ -2228,6 +2325,18 @@
           </a>
         </div>
         <p class="cta-note">13 minutes free · No API key needed, ever</p>
+        <!-- The second product. Same app, run on the visitor's own OpenAI key:
+             a quieter row under the main buttons rather than a second pair of
+             them, because most people arriving here do not have a key and the
+             trial is the better first step for them. The ones who do have one
+             know it, and will see this. -->
+        <p class="edition" id="byok-cta">
+          <span>Have your own OpenAI key?</span>
+          <a href="/download/byok/win" id="dl-byok-win">SAGE BYOK for Windows</a>
+          <span class="edition-sep" aria-hidden="true">·</span>
+          <a href="/download/byok/mac" id="dl-byok-mac">for macOS</a>
+          <a class="edition-more" href="#byok">What’s the difference?</a>
+        </p>
         <p class="cta-alt"><a href="#how">See how it works</a></p>
         <!-- Always shown, not just to Mac visitors: the Mac button is on the
              page for everyone now, so anyone can be the person who needs this.
@@ -2295,11 +2404,12 @@
           <div class="tg-head">
             <span class="tg-chip">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" /></svg>
-              Thanksgiving 2026
+              Thanksgiving · Black Friday
             </span>
             <h2 id="tg-title">Thanksgiving deals<br /><span>are on their way.</span></h2>
             <p>
-              Savings on SAGE Meeting and SAGE Resume Tailor, landing Thanksgiving week.
+              Savings on SAGE Meeting and SAGE Resume Tailor, from Thanksgiving through Black
+              Friday and Cyber Monday.
             </p>
             <!-- Hidden until the script fills it, so a no-JS visitor never sees
                  a row of empty boxes. -->
@@ -2849,7 +2959,7 @@
           <div class="install-col">
             <h3><span class="os-tag">Windows</span> 10 and 11</h3>
             <ol>
-              <li>Run <b>sage-setup.exe</b> from your downloads.</li>
+              <li>Run <b>sage-setup.exe</b> (or <b>sage-byok-setup.exe</b>) from your downloads.</li>
               <li>
                 SmartScreen says <i>&ldquo;Windows protected your PC&rdquo;</i> and names the
                 publisher as unknown. Click <b>More info</b>, then <b>Run anyway</b>. The Run anyway
@@ -2863,7 +2973,7 @@
           <div class="install-col">
             <h3><span class="os-tag">macOS</span> Apple Silicon and Intel</h3>
             <ol>
-              <li>Open the <b>.dmg</b> and drag SAGE into Applications.</li>
+              <li>Open the <b>.dmg</b> and drag SAGE (or SAGE BYOK) into Applications.</li>
               <li>
                 <b>Do not double-click it.</b> Gatekeeper will say the developer cannot be verified
                 and offer only a Cancel button, which looks like the file is broken.
@@ -2925,6 +3035,21 @@
               is no OpenAI bill on top and no API key to create. Nothing renews: when the hours run
               out you decide whether to buy more, and unused hours do not expire. The clock only
               runs while SAGE is listening, not while a session sits open.
+            </p>
+          </details>
+
+          <details>
+            <summary>What is the difference between SAGE and SAGE BYOK?</summary>
+            <p>
+              <b>Who pays OpenAI.</b> SAGE runs on our account: you try it free, then buy hours,
+              and there is no key to create. SAGE BYOK runs on your own OpenAI API key: nothing to
+              buy from us, and OpenAI bills you directly for what you use, at their rates.
+            </p>
+            <p>
+              Everything else is the same app &mdash; the same answers, the same screen-sharing
+              behaviour, the same updates. They are separate installers and can be installed side
+              by side, but a key from one is no use in the other: hours do not apply to BYOK, and
+              an API key cannot be entered into SAGE.
             </p>
           </details>
 
@@ -3007,7 +3132,8 @@
             Thirteen minutes on us, with no key and no card. After that you buy hours: $14.99 for
             three, $17.99 for five. No subscription, nothing renews, and no OpenAI account to set
             up. The clock only runs while SAGE is actually listening, so leaving it open between
-            questions costs you nothing.
+            questions costs you nothing. Already have an OpenAI key? There is a
+            <a style="color: var(--indigo)" href="#byok">second build</a> that runs on it instead.
           </p>
         </div>
 
@@ -3017,8 +3143,9 @@
         <div class="tg-ribbon reveal" data-until="2026-12-01">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" /><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" fill="none" stroke="#fff7ed" stroke-width="1.6" stroke-linecap="round" /></svg>
           <span>
-            <b>Thanksgiving deals are coming.</b> Savings on SAGE Meeting hours land Thanksgiving
-            week. Hours never expire, so anything you buy now stacks with them.
+            <b>Thanksgiving and Black Friday deals are coming.</b> Savings on SAGE Meeting hours
+            run from Thanksgiving through Cyber Monday. Hours never expire, so anything you buy
+            now stacks with them.
           </span>
         </div>
 
@@ -3066,6 +3193,34 @@
               <li style="color: var(--dim)">&mdash; One key activates one computer</li>
             </ul>
             <button class="btn btn-primary buy" data-hours="5" style="justify-content: center; width: 100%">Buy 5 hours</button>
+          </div>
+        </div>
+
+        <!-- The other product, under the packs rather than among them: it is
+             not a fourth price, it is a different way of paying. Someone with
+             a key compares it to the packs; someone without one should not be
+             asked to create an OpenAI account to understand the pricing. -->
+        <div class="byok reveal" id="byok">
+          <div class="byok-text">
+            <p class="eyebrow">Bring your own key</p>
+            <h3>SAGE BYOK &mdash; the same app, on your own OpenAI account</h3>
+            <p>
+              Nothing to buy from us. Paste an OpenAI API key into Settings and every minute is
+              billed by OpenAI to you, at their rates &mdash; no trial, no hour packs, no sign-in,
+              and no limit but your own key. Pick this if you already have a key and would rather
+              pay per use than per pack. Everything else is identical, including updates.
+            </p>
+          </div>
+          <div class="byok-actions">
+            <a class="btn btn-ghost" href="/download/byok/win">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              BYOK for Windows
+            </a>
+            <a class="btn btn-ghost" href="/download/byok/mac">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              BYOK for macOS
+            </a>
+            <span class="byok-note">A separate installer. Both can live on one computer.</span>
           </div>
         </div>
 
@@ -3330,9 +3485,15 @@
               'build for Apple Silicon and Intel). It updates itself: it looks for a new ' +
               'version at start-up, downloads it in the background, and installs it the next ' +
               'time you close the app, never during a session.</p>' +
+              '<p><b>SAGE</b> runs on our account with hours you buy:</p>' +
               '<div class="row">' +
               '<a class="primary" href="/download/win">Windows</a>' +
               '<a class="primary" href="/download/mac">macOS</a>' +
+              '</div>' +
+              '<p><b>SAGE BYOK</b> runs on your own OpenAI API key, with nothing to buy from us:</p>' +
+              '<div class="row">' +
+              '<a class="primary" href="/download/byok/win">BYOK for Windows</a>' +
+              '<a class="primary" href="/download/byok/mac">BYOK for macOS</a>' +
               '</div>'
           },
           contact: {
@@ -3765,6 +3926,11 @@
     <script>
       ;(function () {
         var now = new Date()
+        // The leaf on the brand mark: mid-November to the end of the month,
+        // every year. Same dates as the app's title bar.
+        if (now.getMonth() === 10 && now.getDate() >= 15) {
+          document.documentElement.classList.add('is-season')
+        }
         ;[].forEach.call(document.querySelectorAll('[data-until]'), function (el) {
           var parts = el.getAttribute('data-until').split('-')
           var until = new Date(+parts[0], +parts[1] - 1, +parts[2])
