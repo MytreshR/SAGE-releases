@@ -932,6 +932,15 @@
         color: var(--dim) !important;
         font-weight: 500 !important;
       }
+      /* On a phone the row wrapped mid-phrase, with the separator starting
+         the second line. Three lines, each a whole thought, instead. */
+      @media (max-width: 560px) {
+        .edition > span:first-child,
+        .edition-more {
+          flex-basis: 100%;
+          margin-left: 0;
+        }
+      }
 
       /* The bring-your-own-key panel under the price cards. */
       .byok {
@@ -2330,11 +2339,12 @@
              them, because most people arriving here do not have a key and the
              trial is the better first step for them. The ones who do have one
              know it, and will see this. -->
+        <!-- Windows only for now: the Mac build comes from the release
+             workflow, and until that produces one there is no file for a
+             macOS link to point at. A dead button is worse than no button. -->
         <p class="edition" id="byok-cta">
           <span>Have your own OpenAI key?</span>
           <a href="/download/byok/win" id="dl-byok-win">SAGE BYOK for Windows</a>
-          <span class="edition-sep" aria-hidden="true">·</span>
-          <a href="/download/byok/mac" id="dl-byok-mac">for macOS</a>
           <a class="edition-more" href="#byok">What’s the difference?</a>
         </p>
         <p class="cta-alt"><a href="#how">See how it works</a></p>
@@ -2973,7 +2983,7 @@
           <div class="install-col">
             <h3><span class="os-tag">macOS</span> Apple Silicon and Intel</h3>
             <ol>
-              <li>Open the <b>.dmg</b> and drag SAGE (or SAGE BYOK) into Applications.</li>
+              <li>Open the <b>.dmg</b> and drag SAGE into Applications.</li>
               <li>
                 <b>Do not double-click it.</b> Gatekeeper will say the developer cannot be verified
                 and offer only a Cancel button, which looks like the file is broken.
@@ -3049,7 +3059,7 @@
               Everything else is the same app &mdash; the same answers, the same screen-sharing
               behaviour, the same updates. They are separate installers and can be installed side
               by side, but a key from one is no use in the other: hours do not apply to BYOK, and
-              an API key cannot be entered into SAGE.
+              an API key cannot be entered into SAGE. BYOK is Windows-only for now; macOS follows.
             </p>
           </details>
 
@@ -3216,11 +3226,10 @@
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               BYOK for Windows
             </a>
-            <a class="btn btn-ghost" href="/download/byok/mac">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              BYOK for macOS
-            </a>
-            <span class="byok-note">A separate installer. Both can live on one computer.</span>
+            <span class="byok-note">
+              Windows for now; macOS to follow. A separate installer &mdash; both can live on one
+              computer.
+            </span>
           </div>
         </div>
 
@@ -3490,10 +3499,10 @@
               '<a class="primary" href="/download/win">Windows</a>' +
               '<a class="primary" href="/download/mac">macOS</a>' +
               '</div>' +
-              '<p><b>SAGE BYOK</b> runs on your own OpenAI API key, with nothing to buy from us:</p>' +
+              '<p><b>SAGE BYOK</b> runs on your own OpenAI API key, with nothing to buy from us. ' +
+              'Windows for now; macOS to follow.</p>' +
               '<div class="row">' +
               '<a class="primary" href="/download/byok/win">BYOK for Windows</a>' +
-              '<a class="primary" href="/download/byok/mac">BYOK for macOS</a>' +
               '</div>'
           },
           contact: {
