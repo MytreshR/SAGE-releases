@@ -41,12 +41,12 @@
     },
     {
       "source": "/download",
-      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.4.0-setup.exe",
+      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.5.0-setup.exe",
       "permanent": false
     },
     {
       "source": "/download/win",
-      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.4.0-setup.exe",
+      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-1.5.0-setup.exe",
       "permanent": false
     },
     {
@@ -56,12 +56,12 @@
     },
     {
       "source": "/download/byok",
-      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-byok-1.4.0-setup.exe",
+      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-byok-1.5.0-setup.exe",
       "permanent": false
     },
     {
       "source": "/download/byok/win",
-      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-byok-1.4.0-setup.exe",
+      "destination": "https://github.com/MytreshR/SAGE-releases/releases/latest/download/sage-byok-1.5.0-setup.exe",
       "permanent": false
     }
   ]
