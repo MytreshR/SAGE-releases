@@ -10,9 +10,30 @@ import { create, get, set } from './store.js'
  */
 export const TRIAL_MS = Number(process.env.SAGE_TRIAL_MS || 13 * 60 * 1000)
 
-/** Longest a single heartbeat may deduct, so a stalled client cannot be billed
- *  for the hours it was asleep, and a forged one cannot drain someone's trial. */
-const MAX_TICK_MS = 30_000
+/** Longest a single metered call may deduct, so a stalled client cannot be
+ *  billed for the hours it was asleep, and a forged one cannot drain someone's
+ *  trial. Shared by all three ledgers. */
+export const MAX_TICK_MS = 30_000
+
+/**
+ * How much a metered call costs, by the server's clock.
+ *
+ * This used to be the number the client sent in its heartbeat, capped at
+ * MAX_TICK_MS. The cap stopped a client charging itself for an hour; nothing
+ * stopped it charging itself for nothing. A build that sent elapsedMs: 0, or
+ * sent no heartbeats at all, kept its whole balance for ever - while the chat
+ * proxy and the realtime minter, which deducted nothing themselves, kept
+ * answering it. Every one of those calls spends the vendor's money.
+ *
+ * So every metered call now charges for the wall-clock time since the ledger
+ * last charged this device, capped the same way, and the client's number is
+ * not consulted. An honest app pays exactly what it did: it heartbeats every
+ * 20s while listening, and the gaps between its calls add up to the time it
+ * listened. The one difference is the first call after a long silence, which
+ * is charged one cap rather than nothing.
+ */
+export const tickFor = (record, now = Date.now()) =>
+  Math.min(MAX_TICK_MS, Math.max(0, now - (record.lastSeenAt || now)))
 
 const keyFor = (deviceId) => `sage:trial:${deviceId}`
 
@@ -81,25 +102,43 @@ export async function claim(deviceId, meta = {}) {
   // testing) is treated as new rather than erroring the client into a dead end.
   if (!existing) return { record, fresh: true }
 
-  existing.lastSeenAt = Date.now()
-  await set(key, existing)
+  // lastSeenAt is deliberately NOT touched here. It is the clock the metered
+  // calls charge from, and this endpoint is free and unauthenticated: a client
+  // that could reset the clock by calling claim between answers would pay
+  // nothing for them.
   return { record: existing, fresh: false }
 }
 
 export const remainingMs = (record) => Math.max(0, TRIAL_MS - (record.usedMs || 0))
 
-/** Deducts elapsed session time. Returns the record after the deduction. */
-export async function consume(deviceId, elapsedMs) {
+/** Deducts the time since this device was last charged. Returns the record after. */
+export async function consume(deviceId) {
   const key = keyFor(deviceId)
   const record = await get(key)
   if (!record) return null
 
-  const tick = Math.min(Math.max(0, Number(elapsedMs) || 0), MAX_TICK_MS)
-  record.usedMs = (record.usedMs || 0) + tick
-  record.lastSeenAt = Date.now()
+  const now = Date.now()
+  record.usedMs = (record.usedMs || 0) + tickFor(record, now)
+  record.lastSeenAt = now
   await set(key, record)
   return record
 }
+
+/**
+ * Whether the request says it carries JSON.
+ *
+ * The one check that turns a cross-site form post into a non-event. A page on
+ * another origin can make a browser POST a form here with this site's cookies
+ * attached, but a form can only be sent form-encoded or multipart; to send
+ * application/json it would need a preflighted fetch, and this API answers no
+ * preflight. So an endpoint that insists on JSON is reachable only by this
+ * site's own pages and by the desktop app, both of which send it. Every
+ * endpoint that sets or spends a cookie session checks this first.
+ */
+export const isJson = (req) =>
+  String(req.headers['content-type'] || '')
+    .toLowerCase()
+    .startsWith('application/json')
 
 /** JSON body from a Vercel Node request, tolerating a raw stream. */
 export async function readJson(req) {

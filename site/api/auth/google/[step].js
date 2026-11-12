@@ -1,4 +1,4 @@
-import { signInWeb } from '../../_lib/accounts.js'
+import { maskEmail, signInWeb } from '../../_lib/accounts.js'
 import {
   authorizeUrl,
   exchangeCode,
@@ -70,8 +70,14 @@ function start(req, res) {
   // caller's word for a full URL would make this an open redirect: a link that
   // genuinely signs you in to SAGE and then drops you on a page of somebody
   // else's choosing, with our domain in the part of the address people read.
+  //
+  // One slash and then anything but a slash or a backslash. The check used
+  // to be "starts with / and not //", which let "/\evil.com" through - and a
+  // browser reads a backslash as a slash in an address, so that is
+  // "//evil.com", a link to another site with our domain in the half people
+  // read. login.html applies the same rule to the same parameter.
   const asked = url.searchParams.get('next') || '/account.html'
-  const next = asked.startsWith('/') && !asked.startsWith('//') ? asked : '/account.html'
+  const next = /^\/(?![/\\])/.test(asked) ? asked : '/account.html'
 
   const state = makeState(next)
   // Ten minutes, because that is how long the state is honoured for anyway.
@@ -137,7 +143,7 @@ async function callback(req, res) {
   const { account, token } = await signInWeb(email)
   setSession(res, token)
 
-  console.log(`[auth] ${account.email} signed in with google`)
+  console.log(`[auth] ${maskEmail(account.email)} signed in with google`)
   res.statusCode = 302
   res.setHeader('Location', parsed.next || '/account.html')
   return res.end()

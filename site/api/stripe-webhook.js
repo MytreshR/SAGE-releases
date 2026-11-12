@@ -1,4 +1,4 @@
-import { credit, debit } from './_lib/accounts.js'
+import { credit, debit, maskEmail } from './_lib/accounts.js'
 import { mintKey } from './_lib/keys.js'
 import { get, incr, set } from './_lib/store.js'
 import { json } from './_lib/trial.js'
@@ -59,7 +59,9 @@ export default async function handler(req, res) {
     // account is the same clawback reaching the same money by another route.
     if (order.accountEmail) {
       await debit(order.accountEmail, { sessionId: order.sessionId, reason: event.type })
-      console.log(`[stripe] ${event.type} - took ${order.hours}h back off ${order.accountEmail}`)
+      console.log(
+        `[stripe] ${event.type} - took ${order.hours}h back off ${maskEmail(order.accountEmail)}`
+      )
       return json(res, 200, { debited: true })
     }
 
@@ -162,7 +164,7 @@ export default async function handler(req, res) {
     console.log(
       placeholder
         ? `[stripe] ${sessionId} -> placeholder, no hours added (test purchase, ${pack.hours}h)`
-        : `[stripe] ${sessionId} -> ${pack.hours}h added to ${accountEmail}`
+        : `[stripe] ${sessionId} -> ${pack.hours}h added to ${maskEmail(accountEmail)}`
     )
     return json(res, 200, { credited: !placeholder })
   }
@@ -231,7 +233,7 @@ export default async function handler(req, res) {
   console.log(
     placeholder
       ? `[stripe] ${sessionId} -> placeholder, no key minted (test purchase, ${pack.hours}h)`
-      : `[stripe] ${sessionId} -> key #${serial} (${pack.hours}h) for ${order.email}`
+      : `[stripe] ${sessionId} -> key #${serial} (${pack.hours}h) for ${order.email ? maskEmail(order.email) : 'no address'}`
   )
   return json(res, 200, { fulfilled: true })
 }

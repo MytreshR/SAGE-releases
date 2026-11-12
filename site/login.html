@@ -351,8 +351,10 @@
       // Where to go once signed in. Only ever a path on this site: taking a
       // full URL from the query string would turn a genuine SAGE login into a
       // way of dropping people on somebody else's page.
+      // One slash, then anything but a slash or a backslash: a browser reads
+      // "/\evil.com" as "//evil.com". Same rule as the server applies.
       const asked = params.get('next') || '/account.html'
-      const next = asked.startsWith('/') && !asked.startsWith('//') ? asked : '/account.html'
+      const next = /^\/(?![/\\])/.test(asked) ? asked : '/account.html'
 
       // Sign-in and sign-up are the same act here, because there is no password
       // to set - typing your address either finds your account or makes one.

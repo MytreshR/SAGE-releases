@@ -68,6 +68,18 @@ export async function incr(key) {
 }
 
 /**
+ * A TTL on a key that already exists.
+ *
+ * Used by the per-minute rate-limit buckets, which would otherwise leave one
+ * key per device per minute behind for ever. The dev fallback keeps nothing
+ * long enough to need it.
+ */
+export async function expire(key, seconds) {
+  if (!isPersistent) return
+  await command('EXPIRE', key, seconds)
+}
+
+/**
  * Every key matching a pattern.
  *
  * SCAN rather than KEYS, which blocks the server for as long as it takes to

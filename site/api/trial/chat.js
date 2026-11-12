@@ -1,4 +1,4 @@
-import { requireQuota } from '../_lib/quota.js'
+import { allow, requireQuota, spend } from '../_lib/quota.js'
 import { json } from '../_lib/trial.js'
 
 /**
@@ -39,11 +39,52 @@ const ALLOWED_MODELS = (
   .map((m) => m.trim())
   .filter(Boolean)
 
+/** Answers a minute. The app makes one per question, six at most on a press. */
+const CALLS_PER_MINUTE = 20
+
+/**
+ * The largest completion the app ever asks for is 3600 tokens - a 1600-token
+ * screenshot solution plus the reasoning headroom completionBudget adds. A
+ * request asking for more is not the app.
+ */
+const MAX_OUTPUT_TOKENS = 4096
+
+/** A screenshot rides inside messages as a JPEG data URL, so this is generous. */
+const MAX_BODY_CHARS = 4_000_000
+
+/**
+ * What is forwarded is what the vendor pays for, so its shape is bounded here
+ * rather than taken on trust. The app asks for one choice, streams, sets a
+ * completion budget and never sends tools. Returns the refusal, or null.
+ */
+function boundBody(body) {
+  if (!Array.isArray(body.messages) || body.messages.length === 0) return 'missing-body'
+  if (body.n !== undefined && body.n !== 1) return 'n-not-allowed'
+  if (body.tools || body.functions || body.tool_choice) return 'tools-not-allowed'
+  for (const field of ['max_completion_tokens', 'max_tokens']) {
+    if (body[field] !== undefined && !(Number(body[field]) <= MAX_OUTPUT_TOKENS)) {
+      return 'too-many-tokens'
+    }
+  }
+  // Older clients that set no budget get the ceiling rather than OpenAI's
+  // default, which is the model's whole context.
+  if (body.max_completion_tokens === undefined && body.max_tokens === undefined) {
+    body.max_completion_tokens = MAX_OUTPUT_TOKENS
+  }
+  if (JSON.stringify(body).length > MAX_BODY_CHARS) return 'body-too-large'
+  return null
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return json(res, 405, { error: 'method-not-allowed' })
 
   const gate = await requireQuota(req, res)
   if (!gate) return
+
+  // How often, as well as how long - see allow().
+  if (!(await allow(gate.deviceId, 'chat', CALLS_PER_MINUTE))) {
+    return json(res, 429, { error: 'too-many-requests' })
+  }
 
   const body = gate.body
   if (!body || typeof body !== 'object' || !body.model) {
@@ -57,6 +98,13 @@ export default async function handler(req, res) {
   if (!ALLOWED_MODELS.includes(body.model)) {
     return json(res, 400, { error: 'model-not-allowed' })
   }
+
+  const refused = boundBody(body)
+  if (refused) return json(res, 400, { error: refused })
+
+  // Charge for the time since this device was last charged, before OpenAI is
+  // asked for anything. The heartbeat is no longer the only thing that spends.
+  await spend(gate)
 
   const upstream = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',

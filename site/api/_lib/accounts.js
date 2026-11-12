@@ -1,6 +1,7 @@
 import { createHmac, randomBytes, randomInt, timingSafeEqual } from 'crypto'
 import { get, set } from './store.js'
 import { hoursForSerial } from './licence.js'
+import { tickFor } from './trial.js'
 
 /**
  * Accounts: hours that follow the person, not the machine.
@@ -39,6 +40,18 @@ export const normalise = (email) => String(email || '').trim().toLowerCase()
 
 /** Good enough to reject a typo and a header injection; the code proves the rest. */
 export const looksLikeEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(normalise(email))
+
+/**
+ * An address as it appears in a log line.
+ *
+ * The store is keyed by hashes so that it is not a readable list of who uses
+ * SAGE; the logs were. Enough is kept to match a line against a support email
+ * from the same person, and not enough to make the log that list.
+ */
+export const maskEmail = (email) => {
+  const [user = '', domain = ''] = normalise(email).split('@')
+  return `${user.slice(0, 2)}***@${domain}`
+}
 
 function secret() {
   const value = process.env.SAGE_SESSION_SECRET
@@ -403,11 +416,14 @@ export async function debit(email, { sessionId, reason = 'refund' }) {
   return saveAccount(account)
 }
 
-/** Spends listening time. Clamped to what was bought - see licence.js. */
-export async function consume(email, elapsedMs) {
+/**
+ * Spends listening time: the wall-clock since this account was last charged,
+ * by the server's clock - see tickFor. Clamped to what was bought, as in
+ * licence.js. saveAccount stamps lastSeenAt, which is the clock being read.
+ */
+export async function consume(email) {
   const account = await getAccount(email)
   if (!account) return null
-  const tick = Math.min(Math.max(0, Number(elapsedMs) || 0), 30_000)
-  account.usedMs = Math.min((account.usedMs || 0) + tick, account.grantedMs || 0)
+  account.usedMs = Math.min((account.usedMs || 0) + tickFor(account), account.grantedMs || 0)
   return saveAccount(account)
 }

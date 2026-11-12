@@ -10,9 +10,11 @@ import { consume, isValidDeviceId, json, readJson, remainingMs } from '../_lib/t
  * Metering here rather than by wall clock is what lets someone install SAGE
  * the night before and still have their full trial in the morning.
  *
- * The server caps each tick, so a client that sleeps for an hour and reports
- * it, or one edited to report a negative, moves the counter by at most one
- * interval. Nothing here trusts the number it is sent.
+ * The number the client sends is not used at all any more. Each tick deducts
+ * the wall-clock time since the ledger last charged this device, capped at
+ * one interval - see tickFor in trial.js. A client that sleeps for an hour
+ * pays one interval; one edited to report nothing pays the same as one that
+ * reports honestly.
  *
  * Which pot the tick comes out of is decided the same way requireQuota decides
  * it - account, then licence, then trial, whichever has time. It has to be the
@@ -24,14 +26,14 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return json(res, 405, { error: 'method-not-allowed' })
 
   const body = await readJson(req)
-  const { deviceId, elapsedMs } = body
+  const { deviceId } = body
   if (!isValidDeviceId(deviceId)) return json(res, 400, { error: 'bad-device-id' })
 
   // Signed in: the hours belong to the person, so they are spent wherever that
   // person is, not wherever the key was redeemed.
   const account = await accountFor(req, body, deviceId)
   if (account && accounts.remainingMs(account) > 0) {
-    const after = await accounts.consume(account.email, elapsedMs)
+    const after = await accounts.consume(account.email)
     return json(res, 200, {
       remainingMs: accounts.remainingMs(after || account),
       ledger: 'account'
@@ -42,7 +44,7 @@ export default async function handler(req, res) {
   // deducting from an empty trial would report zero and stop a paid session.
   const held = await licence.getLicence(deviceId)
   if (held && licence.remainingMs(held) > 0) {
-    const after = await licence.consume(deviceId, elapsedMs)
+    const after = await licence.consume(deviceId)
     return json(res, 200, {
       remainingMs: licence.remainingMs(after || held),
       ledger: 'licence'
@@ -55,7 +57,7 @@ export default async function handler(req, res) {
   if (account) return json(res, 200, { remainingMs: 0, ledger: 'account' })
   if (held) return json(res, 200, { remainingMs: 0, ledger: 'licence' })
 
-  const record = await consume(deviceId, elapsedMs)
+  const record = await consume(deviceId)
   if (!record) return json(res, 404, { error: 'unknown-device' })
 
   return json(res, 200, { remainingMs: remainingMs(record), ledger: 'trial' })

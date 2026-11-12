@@ -1,8 +1,17 @@
-import { checkCode, issueCode, looksLikeEmail, normalise, remainingMs, signIn, signInWeb } from '../_lib/accounts.js'
+import {
+  checkCode,
+  issueCode,
+  looksLikeEmail,
+  maskEmail,
+  normalise,
+  remainingMs,
+  signIn,
+  signInWeb
+} from '../_lib/accounts.js'
 import { canSendEmail, sendLoginCode } from '../_lib/email.js'
 import { setSession } from '../_lib/session.js'
 import { incr } from '../_lib/store.js'
-import { isValidDeviceId, json, readJson } from '../_lib/trial.js'
+import { isJson, isValidDeviceId, json, readJson } from '../_lib/trial.js'
 
 /**
  * Signing in: /api/auth/code, /api/auth/verify, /api/auth/web-verify.
@@ -21,6 +30,14 @@ export default async function handler(req, res) {
   const action = new URL(req.url, 'http://localhost').pathname.split('/').filter(Boolean).pop()
 
   if (req.method !== 'POST') return json(res, 405, { error: 'method-not-allowed' })
+
+  // JSON only, and this is a security check rather than a formality. web-verify
+  // sets the browser's session cookie for whatever address and code it is
+  // given, so a page on another site that could POST a form here would sign
+  // the visitor in to an account of ITS choosing - after which anything they
+  // bought would land on that account. A form cannot be sent as JSON, and a
+  // cross-site fetch that is would be refused at the preflight. See isJson.
+  if (!isJson(req)) return json(res, 415, { error: 'json-required' })
 
   if (action === 'code') return sendCode(req, res)
   if (action === 'verify') return verifyDevice(req, res)
@@ -55,7 +72,7 @@ async function sendCode(req, res) {
   if (sentThisHour > 5) {
     // Still answers success. A caller who can tell throttling apart from
     // sending can use it to probe which addresses are real.
-    console.warn(`[auth] throttled code for ${normalise(email)}`)
+    console.warn(`[auth] throttled code for ${maskEmail(email)}`)
     return json(res, 200, { sent: true })
   }
 
@@ -96,7 +113,7 @@ async function verifyDevice(req, res) {
 
   const { account, token } = await signIn(email, deviceId)
 
-  console.log(`[auth] ${account.email} signed in on ${deviceId.slice(0, 8)}…`)
+  console.log(`[auth] ${maskEmail(account.email)} signed in on ${deviceId.slice(0, 8)}…`)
   return json(res, 200, {
     token,
     email: account.email,
@@ -130,7 +147,7 @@ async function verifyBrowser(req, res) {
   // HttpOnly, so the page it signs in never gets to read it back.
   setSession(res, token)
 
-  console.log(`[auth] ${account.email} signed in to the website`)
+  console.log(`[auth] ${maskEmail(account.email)} signed in to the website`)
   return json(res, 200, {
     email: account.email,
     remainingMs: remainingMs(account)

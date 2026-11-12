@@ -1,4 +1,4 @@
-import { remainingMs, signOutEverywhere } from '../_lib/accounts.js'
+import { maskEmail, remainingMs, signOutEverywhere } from '../_lib/accounts.js'
 import { getMany, scan } from '../_lib/store.js'
 import { PACKS, packFor } from '../_lib/packs.js'
 import {
@@ -9,7 +9,7 @@ import {
   SESSION_COOKIE
 } from '../_lib/session.js'
 import { createCheckoutSession, isConfigured } from '../_lib/stripe.js'
-import { json, readJson } from '../_lib/trial.js'
+import { isJson, json, readJson } from '../_lib/trial.js'
 
 /**
  * The account page's endpoints: /api/account/me, /checkout, /logout.
@@ -25,12 +25,17 @@ export default async function handler(req, res) {
     if (req.method !== 'GET') return json(res, 405, { error: 'method-not-allowed' })
     return me(req, res)
   }
+  // The two that change state behind the cookie take JSON only, so a form on
+  // another site cannot drive them with this site's cookie attached. See
+  // isJson, and the longer note in auth/[action].js.
   if (action === 'checkout') {
     if (req.method !== 'POST') return json(res, 405, { error: 'method-not-allowed' })
+    if (!isJson(req)) return json(res, 415, { error: 'json-required' })
     return checkout(req, res)
   }
   if (action === 'logout') {
     if (req.method !== 'POST') return json(res, 405, { error: 'method-not-allowed' })
+    if (!isJson(req)) return json(res, 415, { error: 'json-required' })
     return logout(req, res)
   }
   if (action === 'stats') {
@@ -169,7 +174,7 @@ async function logout(req, res) {
 
   if (account && everywhere === true) {
     await signOutEverywhere(account.email)
-    console.log(`[auth] ${account.email} signed out everywhere`)
+    console.log(`[auth] ${maskEmail(account.email)} signed out everywhere`)
   }
 
   clearCookie(res, SESSION_COOKIE)

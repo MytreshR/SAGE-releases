@@ -1,4 +1,5 @@
 import { get, set } from './store.js'
+import { tickFor } from './trial.js'
 
 /**
  * The licence ledger: hours bought, hours spent.
@@ -48,13 +49,6 @@ const TIER_HOURS = {
 export const hoursForSerial = (serial) => TIER_HOURS[Math.floor(serial / TIER_BAND)] ?? 5
 
 export const msForSerial = (serial) => hoursForSerial(serial) * 60 * 60 * 1000
-
-/**
- * Longest a single heartbeat may deduct. Same reasoning as the trial's cap and
- * the same number: a client that slept for an hour, or one edited to report
- * one, moves the counter by at most one interval.
- */
-const MAX_TICK_MS = 30_000
 
 const keyFor = (deviceId) => `sage:licence:${deviceId}`
 
@@ -108,13 +102,17 @@ export const remainingMs = (record) =>
 
 export const totalMs = (record) => (record ? record.grantedMs || 0 : 0)
 
-/** Deducts elapsed listening time. Returns the record after the deduction. */
-export async function consume(deviceId, elapsedMs) {
+/**
+ * Deducts the time since this device was last charged - by the server's
+ * clock, not the client's number; see tickFor. Returns the record after.
+ */
+export async function consume(deviceId) {
   const key = keyFor(deviceId)
   const record = await get(key)
   if (!record) return null
 
-  const tick = Math.min(Math.max(0, Number(elapsedMs) || 0), MAX_TICK_MS)
+  const now = Date.now()
+  const tick = tickFor(record, now)
 
   // Clamped to what was actually bought: you cannot spend more time than you
   // hold. Without this the counter runs past the balance - a heartbeat deducts
@@ -124,7 +122,7 @@ export async function consume(deviceId, elapsedMs) {
   // NEXT key the customer buys: they pay for five hours and get four and a
   // half. Found by a test that drained a licence and topped it up again.
   record.usedMs = Math.min((record.usedMs || 0) + tick, record.grantedMs || 0)
-  record.lastSeenAt = Date.now()
+  record.lastSeenAt = now
   await set(key, record)
   return record
 }

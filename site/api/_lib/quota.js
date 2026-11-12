@@ -1,6 +1,14 @@
 import * as accounts from './accounts.js'
 import * as licence from './licence.js'
-import { claim, isValidDeviceId, json, readJson, remainingMs as trialRemaining } from './trial.js'
+import { expire, incr } from './store.js'
+import {
+  claim,
+  consume as consumeTrial,
+  isValidDeviceId,
+  json,
+  readJson,
+  remainingMs as trialRemaining
+} from './trial.js'
 
 /**
  * Which pot a device spends from, and whose money pays for it.
@@ -219,4 +227,37 @@ export async function requireQuota(req, res) {
     return null
   }
   return { deviceId, body, ledger: 'trial', apiKey, remainingMs: left, record }
+}
+
+/**
+ * Charges the gate's ledger for the time since it was last charged.
+ *
+ * Called by every endpoint that spends the vendor's money, once the gate has
+ * let it through. The heartbeat used to be the only thing that deducted, and
+ * only by the number the client sent - so a client that sent none kept its
+ * balance for ever while this proxy kept answering it. Now the ledger moves on
+ * every metered call, by the server's clock; see tickFor in trial.js.
+ */
+export async function spend(gate) {
+  if (gate.ledger === 'account') return accounts.consume(gate.email)
+  if (gate.ledger === 'licence') return licence.consume(gate.deviceId)
+  return consumeTrial(gate.deviceId)
+}
+
+/**
+ * A per-device, per-minute ceiling on calls.
+ *
+ * Metering bounds how LONG a device can be answered; this bounds how OFTEN.
+ * Without it a device with a minute of balance left could make a thousand
+ * calls inside that minute, each one paid for by the vendor. The limits are
+ * set well above what the app does - one answer per question, six at most on
+ * a press, one transcription session at a time - and well below what makes a
+ * script worth writing.
+ */
+export async function allow(deviceId, what, limit) {
+  const minute = Math.floor(Date.now() / 60_000)
+  const key = `sage:rl:${what}:${deviceId}:${minute}`
+  const count = await incr(key)
+  if (count === 1) await expire(key, 120)
+  return count <= limit
 }

@@ -1,5 +1,8 @@
-import { requireQuota } from '../_lib/quota.js'
+import { allow, requireQuota, spend } from '../_lib/quota.js'
 import { json } from '../_lib/trial.js'
+
+/** Sessions a minute. The app opens one per Start, and reconnects rarely. */
+const MINTS_PER_MINUTE = 6
 
 /**
  * POST /api/trial/realtime-token  { deviceId }  ->  { token, expiresAt, remainingMs }
@@ -20,6 +23,15 @@ export default async function handler(req, res) {
   // still open a realtime socket and keep billing.
   const gate = await requireQuota(req, res)
   if (!gate) return
+
+  // Each secret opens a transcription session on the vendor's account, so
+  // how often they are minted is bounded as well as whether - see allow().
+  if (!(await allow(gate.deviceId, 'realtime', MINTS_PER_MINUTE))) {
+    return json(res, 429, { error: 'too-many-requests' })
+  }
+
+  // Charged like every other metered call; see spend().
+  await spend(gate)
 
   const upstream = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
     method: 'POST',
